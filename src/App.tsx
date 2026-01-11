@@ -1,3 +1,4 @@
+import { useUI } from "./components/UIProvider";
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { 
   Transaction, 
@@ -227,6 +228,7 @@ const CustomDateInput: React.FC<{
 };
 
 const App: React.FC = () => {
+    const { confirm, toast } = useUI();
   const getHojeLocal = () => {
     const d = new Date();
     const ano = d.getFullYear();
