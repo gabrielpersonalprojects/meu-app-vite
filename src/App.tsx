@@ -142,7 +142,7 @@ const CustomDropdown: React.FC<CustomDropdownProps> = ({ label, value, options, 
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
-        className="w-full p-2.5 bg-slate-50 dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-100 outline-none focus:ring-2 focus:ring-indigo-100 dark:focus:ring-indigo-900 font-semibold text-sm text-left flex justify-between items-center transition-all hover:bg-slate-100 dark:hover:bg-slate-750 shadow-sm"
+        className="w-full p-2.5 bg-slate-50 dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-100 outline-none focus:ring-2 focus:ring-indigo-100 dark:focus:ring-indigo-900 font-medium text-sm text-left flex justify-between items-center transition-all hover:bg-slate-100 dark:hover:bg-slate-750 shadow-sm"
       >
         <span className="truncate">{displayValue}</span>
         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={`transition-transform duration-200 opacity-50 ${isOpen ? 'rotate-180' : ''}`}><path d="m6 9 6 6 6-6"/></svg>
