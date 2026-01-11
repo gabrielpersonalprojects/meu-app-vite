@@ -931,72 +931,24 @@ const App: React.FC = () => {
 
         <div className="lg:col-span-8 space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-  {/* Saldo */}
-  <div className="bg-[#0f172a] p-8 rounded-[2.5rem] shadow-xl relative flex flex-col justify-center min-h-[160px]">
-    <div className="absolute top-6 right-8 text-slate-500">
-      <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M21 12V7H5a2 2 0 0 1 0-4h14v4" />
-        <path d="M3 5v14a2 2 0 0 0 2 2h16v-5" />
-        <path d="M18 12a2 2 0 0 0 0 4h4v-4Z" />
-      </svg>
-    </div>
-
-    <p className="text-[10px] text-indigo-300 uppercase tracking-[0.34em] font-medium mb-4">
-      Saldo Disponível
-    </p>
-
-    <div className="space-y-2">
-      <p className="text-4xl font-semibold text-white tracking-tight">
-        {stats.saldoTotal.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
-      </p>
-      <div className="w-12 h-1.5 bg-indigo-500 rounded-full opacity-80"></div>
-    </div>
-  </div>
-
-  {/* Entradas */}
-  <div className="bg-white dark:bg-slate-900 p-8 rounded-[2.5rem] border border-slate-100 dark:border-slate-800 shadow-sm flex flex-col justify-center min-h-[160px] relative transition-colors">
-    <div className="absolute top-6 right-8 p-2 bg-emerald-50 dark:bg-emerald-900/20 text-emerald-500 rounded-xl">
-      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-        <polyline points="22 7 13.5 15.5 8.5 10.5 2 17" />
-        <polyline points="16 7 22 7 22 13" />
-      </svg>
-    </div>
-
-    <p className="text-[10px] text-slate-400 dark:text-slate-500 uppercase tracking-[0.30em] font-medium mb-4">
-      Entradas (Mês)
-    </p>
-
-    <p className="text-3xl font-semibold text-slate-900 dark:text-white tracking-tight">
-      {formatarMoeda(stats.receitaMes)}
-    </p>
-
-    <p className="text-[10px] text-slate-400 dark:text-slate-500 mt-1 uppercase tracking-[0.28em] font-medium">
-      Pendente:{" "}
-      <span className="font-semibold text-emerald-600 dark:text-emerald-400 tracking-normal">
-        {formatarMoeda(stats.pendenteReceita)}
-      </span>
-    </p>
-  </div>
-
-  {/* Saídas */}
-  <div className="bg-white dark:bg-slate-900 p-8 rounded-[2.5rem] border border-slate-100 dark:border-slate-800 shadow-sm flex flex-col justify-center min-h-[160px] relative transition-colors">
-    <div className="absolute top-6 right-8 p-2 bg-rose-50 dark:bg-rose-900/20 text-rose-500 rounded-xl">
-      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-        <polyline points="22 17 13.5 8.5 8.5 13.5 2 7" />
-        <polyline points="16 17 22 17 22 11" />
-      </svg>
-    </div>
-
-    <p className="text-[10px] text-slate-400 dark:text-slate-500 uppercase tracking-[0.30em] font-medium mb-4">
-      Saídas (Mês)
-    </p>
-
-    <p className="text-3xl font-semibold text-slate-900 dark:text-white tracking-tight">
-      {formatarMoeda(stats.despesaMes)}
-    </p>
-
-    <p cla
-
+            <div className="bg-[#0f172a] p-8 rounded-[2.5rem] shadow-xl relative flex flex-col justify-center min-h-[160px]">
+              <div className="absolute top-6 right-8 text-slate-500"><svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 12V7H5a2 2 0 0 1 0-4h14v4"/><path d="M3 5v14a2 2 0 0 0 2 2h16v-5"/><path d="M18 12a2 2 0 0 0 0 4h4v-4Z"/></svg></div>
+              <p className="text-[10px] font-black text-indigo-400 uppercase tracking-[0.25em] mb-4">Saldo Disponível</p>
+              <div className="space-y-2"><p className="text-4xl font-black text-white tracking-tight">{stats.saldoTotal.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</p><div className="w-12 h-1.5 bg-indigo-500 rounded-full opacity-80"></div></div>
+            </div>
+            <div className="bg-white dark:bg-slate-900 p-8 rounded-[2.5rem] border border-slate-100 dark:border-slate-800 shadow-sm flex flex-col justify-center min-h-[160px] relative transition-colors">
+              <div className="absolute top-6 right-8 p-2 bg-emerald-50 dark:bg-emerald-900/20 text-emerald-500 rounded-xl"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg></div>
+              <p className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-[0.2em] mb-4">Entradas (Mês)</p>
+              <p className="text-3xl font-black text-slate-900 dark:text-white tracking-tight">{formatarMoeda(stats.receitaMes)}</p>
+              <p className="text-[10px] font-black uppercase tracking-wider text-slate-400 dark:text-slate-500 mt-1">Pendente: <span className="text-emerald-600 dark:text-emerald-400">{formatarMoeda(stats.pendenteReceita)}</span></p>
+            </div>
+            <div className="bg-white dark:bg-slate-900 p-8 rounded-[2.5rem] border border-slate-100 dark:border-slate-800 shadow-sm flex flex-col justify-center min-h-[160px] relative transition-colors">
+              <div className="absolute top-6 right-8 p-2 bg-rose-50 dark:bg-rose-900/20 text-rose-500 rounded-xl"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="22 17 13.5 8.5 8.5 13.5 2 7"/><polyline points="16 17 22 17 22 11"/></svg></div>
+              <p className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-[0.2em] mb-4">Saídas (Mês)</p>
+              <p className="text-3xl font-black text-slate-900 dark:text-white tracking-tight">{formatarMoeda(stats.despesaMes)}</p>
+              <p className="text-[10px] font-black uppercase tracking-wider text-slate-400 dark:text-slate-500 mt-1">Pendente: <span className="text-rose-600 dark:text-rose-400">{formatarMoeda(stats.pendenteDespesa)}</span></p>
+            </div>
+          </div>
           
           <div className="bg-white dark:bg-slate-900 p-2 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-800 flex gap-2 overflow-x-auto no-scrollbar transition-colors">
             {(['transacoes', 'gastos', 'projecao'] as TabType[]).map(tab => (
