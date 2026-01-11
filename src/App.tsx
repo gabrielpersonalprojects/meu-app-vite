@@ -288,22 +288,47 @@ const App: React.FC = () => {
   const [formDataTerminoFixa, setFormDataTerminoFixa] = useState(getHojeLocal());
 
   useEffect(() => {
-    isDataLoadedRef.current = false;
-    const prefix = activeProfileId === 'default' ? '' : `${activeProfileId}_`;
-    const savedTrans = localStorage.getItem(`${prefix}transacoes`);
-    const savedCats = localStorage.getItem(`${prefix}categorias`);
-    const savedMetodos = localStorage.getItem(`${prefix}metodosPagamento`);
-    const savedName = localStorage.getItem(`${prefix}userName`);
+  isDataLoadedRef.current = false;
 
-    setTransacoes(savedTrans ? JSON.parse(savedTrans) : []);
-    setCategorias(savedCats ? JSON.parse(savedCats) : CATEGORIAS_PADRAO);
-    setMetodosPagamento(savedMetodos ? JSON.parse(savedMetodos) : { credito: [], debito: [] });
-    setUserName(savedName === null ? '' : savedName);
-    setNameInput(savedName === null ? '' : savedName);
-    setIsEditingName(savedName === null);
-    localStorage.setItem('activeProfileId', activeProfileId);
-    setTimeout(() => { isDataLoadedRef.current = true; }, 0);
-  }, [activeProfileId]);
+  const prefix = activeProfileId === 'default' ? '' : `${activeProfileId}_`;
+
+  const savedTrans = localStorage.getItem(`${prefix}transacoes`);
+  const savedCats = localStorage.getItem(`${prefix}categorias`);
+  const savedMetodos = localStorage.getItem(`${prefix}metodosPagamento`);
+  const savedName = localStorage.getItem(`${prefix}userName`);
+
+  // transações
+  setTransacoes(savedTrans ? JSON.parse(savedTrans) : []);
+
+  // categorias (protege contra dado antigo/errado no localStorage)
+  const parsedCats = savedCats ? JSON.parse(savedCats) : null;
+  const catsOk =
+    parsedCats &&
+    Array.isArray(parsedCats.despesa) &&
+    Array.isArray(parsedCats.receita);
+
+  setCategorias(catsOk ? parsedCats : CATEGORIAS_PADRAO);
+
+  // métodos de pagamento (protege contra dado antigo/errado)
+  const parsedMet = savedMetodos ? JSON.parse(savedMetodos) : null;
+  const metOk =
+    parsedMet &&
+    Array.isArray(parsedMet.credito) &&
+    Array.isArray(parsedMet.debito);
+
+  setMetodosPagamento(metOk ? parsedMet : { credito: [], debito: [] });
+
+  setUserName(savedName === null ? '' : savedName);
+  setNameInput(savedName === null ? '' : savedName);
+  setIsEditingName(savedName === null);
+
+  localStorage.setItem('activeProfileId', activeProfileId);
+
+  setTimeout(() => {
+    isDataLoadedRef.current = true;
+  }, 0);
+}, [activeProfileId]);
+
 
   useEffect(() => {
     if (isClearingRef.current || isClearing || !isDataLoadedRef.current) return;
