@@ -3,11 +3,14 @@
 @tailwind utilities;
 
 body {
-  font-family: "Plus Jakarta Sans", system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+  font-family: "Poppins", system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+  font-weight: 400;
+
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
 }
+
 
 
 
@@ -121,14 +124,21 @@ body {
   outline: none !important;
 }
 
-/* Tipografia mais refinada (tira o “grosseiro” sem quebrar o layout) */
-h1.font-black, h2.font-black, h3.font-black,
-h1.font-bold,  h2.font-bold,  h3.font-bold {
-  font-weight: 600 !important;     /* semibold */
+/* Deixa títulos e CTAs mais refinados:
+   tudo que estava "bold/black" vira Medium (500) */
+h1, h2, h3,
+.font-black, .font-extrabold, .font-bold {
+  font-weight: 500 !important;
   letter-spacing: -0.01em;
 }
 
-/* Labels em caps mais elegantes */
+/* Botões: mesma sensação (CTA elegante) */
+button {
+  font-weight: 500;
+}
+
+/* Labels em caps ficam menos agressivos */
 label {
   letter-spacing: 0.06em;
 }
+
