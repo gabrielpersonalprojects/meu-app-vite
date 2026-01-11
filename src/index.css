@@ -70,18 +70,25 @@ body {
 }
 
 /* Toasts */
-.ui-toasts {
+#ui-toasts.ui-toasts{
   position: fixed;
-  right: 14px;
-  bottom: 14px;
+  left: 50% !important;
+  right: auto !important;
+  bottom: 24px !important;
+  top: auto !important;
+  transform: translateX(-50%) !important;
+  z-index: 9999 !important;
+
   display: flex;
   flex-direction: column;
+  align-items: center;
   gap: 10px;
-  z-index: 10000;
 }
 
+
+
 .ui-toast {
-  width: min(92vw, 360px);
+  width: min(92vw, 460px);
   background: #111;
   color: #fff;
   border-radius: 14px;
