@@ -749,7 +749,7 @@ const App: React.FC = () => {
           </div>
           <div className="flex items-center gap-3">
             <button type="button" onClick={() => setIsDarkMode(!isDarkMode)} className="p-2.5 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 rounded-xl hover:bg-slate-200 dark:hover:bg-slate-700 transition-all active:scale-95 shadow-sm border border-transparent dark:border-slate-700" title={isDarkMode ? "Modo Claro" : "Modo Escuro"}>{isDarkMode ? <SunIcon /> : <MoonIcon />}</button>
-            <button type="button" onClick={handleLimparDados} className="px-6 py-2.5 bg-rose-500 hover:bg-rose-600 text-white rounded-xl font-bold transition-all shadow-md active:scale-95">Limpar Dados</button>
+           
           </div>
         </div>
       </header>
