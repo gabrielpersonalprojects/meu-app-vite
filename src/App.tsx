@@ -1108,61 +1108,61 @@ const App: React.FC = () => {
             {activeTab === 'transacoes' && (
               <div className="space-y-4 animate-in fade-in duration-500">
                 <div className="flex flex-col gap-4 pb-6 border-b border-slate-50 dark:border-slate-800">
-               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-12 gap-3 items-end">
-  {/* MÊS */}
+             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-12 gap-2 items-end w-full">
   <div className="lg:col-span-3">
     <CustomDateInput
       type="month"
       value={filtroMes}
       onChange={setFiltroMes}
+      compact
       className="w-full"
     />
   </div>
 
-  {/* CATEGORIAS */}
   <div className="lg:col-span-3">
     <CustomDropdown
       placeholder="Categorias"
       value={filtroCategoria}
       options={["Todas", ...todasCategorias]}
       onSelect={(val) => setFiltroCategoria(val === "Todas" ? "" : val)}
+      compact
       className="w-full"
     />
   </div>
 
-  {/* C/C & CARTÕES */}
   <div className="lg:col-span-3">
     <CustomDropdown
       placeholder="C/C & Cartões"
       value={filtroMetodo}
       options={["Todos", ...metodosPagamento.credito]}
       onSelect={(val) => setFiltroMetodo(val === "Todos" ? "" : val)}
+      compact
       className="w-full"
     />
   </div>
 
-  {/* TIPO GASTO */}
   <div className="lg:col-span-2">
     <CustomDropdown
       placeholder="Tipo Gasto"
       value={filtroTipoGasto}
       options={["Todos", "Fixo", "Variável"]}
       onSelect={(val) => setFiltroTipoGasto(val === "Todos" ? "" : val)}
+      compact
       className="w-full"
     />
   </div>
 
-  {/* LIMPAR */}
   <div className="lg:col-span-1">
     <button
       type="button"
       onClick={limparFiltros}
-      className="w-full h-10 rounded-xl px-4 text-sm font-semibold text-indigo-700 dark:text-indigo-300 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 transition"
+      className="w-full lg:w-auto h-9 rounded-lg px-3 text-sm font-semibold text-indigo-700 dark:text-indigo-300 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 transition"
     >
       Limpar
     </button>
   </div>
 </div>
+
 
 
 
