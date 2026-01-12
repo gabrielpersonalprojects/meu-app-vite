@@ -738,7 +738,7 @@ const App: React.FC = () => {
     {/* HEADER MOBILE */}
 <div className="md:hidden w-full">
   {/* Linha do topo: ícone central + settings alinhado na mesma altura */}
-  <div className="grid grid-cols-3 items-center">
+  <div className="grid grid-cols-3 items-center h-11">
     <div /> {/* coluna vazia pra centralizar o ícone */}
     <div className="flex justify-center">
       <div className="flex items-center justify-center w-11 h-11 rounded-xl bg-gradient-to-br from-indigo-600 to-violet-700 shadow-lg dark:shadow-[0_0_26px_rgba(255,255,255,0.28)]">
