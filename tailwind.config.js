@@ -6,7 +6,15 @@ module.exports = {
     './src/**/*.{js,ts,jsx,tsx}',
   ],
   theme: {
-    extend: {},
+    extend: {theme: {
+  extend: {
+    fontFamily: {
+      montserrat: ['Montserrat', 'ui-sans-serif', 'system-ui'],
+      opensans: ['"Open Sans"', 'ui-sans-serif', 'system-ui'],
+    },
+  },
+},
+},
   },
   plugins: [],
 }
