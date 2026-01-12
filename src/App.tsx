@@ -747,10 +747,6 @@ const App: React.FC = () => {
               <p className="text-slate-400 dark:text-slate-500 font-medium text-base tracking-tight -mt-0.5">seu dinheiro, sua carteira, seu controle</p>
             </div>
           </div>
-          <div className="flex items-center gap-3">
-            <button type="button" onClick={() => setIsDarkMode(!isDarkMode)} className="p-2.5 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 rounded-xl hover:bg-slate-200 dark:hover:bg-slate-700 transition-all active:scale-95 shadow-sm border border-transparent dark:border-slate-700" title={isDarkMode ? "Modo Claro" : "Modo Escuro"}>{isDarkMode ? <SunIcon /> : <MoonIcon />}</button>
-           
-          </div>
         </div>
       </header>
 
