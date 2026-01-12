@@ -765,12 +765,18 @@ const App: React.FC = () => {
   {/* Texto abaixo */}
   <div className="mt-3 text-center">
     <div className="flex items-baseline gap-1.5 justify-center">
-      <span className="text-3xl font-black text-slate-900 dark:text-white tracking-tight">Meu</span>
-      <span className="text-3xl font-bold text-slate-400 dark:text-slate-500 tracking-tight">Financeiro</span>
-    </div>
-    <p className="text-slate-400 dark:text-slate-500 font-medium text-base tracking-tight">
-      seu dinheiro, sua carteira, seu controle
-    </p>
+      <span className="font-montserrat font-extrabold text-3xl text-slate-900 dark:text-white tracking-tight">
+  Meu
+</span>
+
+<span className="font-montserrat font-bold text-3xl text-slate-500 dark:text-slate-400 tracking-tight">
+  Financeiro
+</span>
+
+<p className="font-opensans font-light text-slate-500/90 dark:text-slate-400/90 text-sm md:text-base tracking-wide">
+  seu dinheiro, sua carteira, seu controle
+</p>
+
   </div>
 </div>
 
