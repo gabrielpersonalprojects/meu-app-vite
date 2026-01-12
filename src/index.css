@@ -168,4 +168,10 @@ input[type="date"] {
   appearance: none;
 }
 
+/* Esconde o ícone nativo, mas mantém a área clicável funcionando */
+input[type="date"]::-webkit-calendar-picker-indicator,
+input[type="month"]::-webkit-calendar-picker-indicator {
+  opacity: 0;
+  cursor: pointer;
+}
 
