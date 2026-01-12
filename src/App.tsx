@@ -153,18 +153,15 @@ const CustomDropdown: React.FC<CustomDropdownProps> = ({
 
       <button
         type="button"
-        onClick={() => setIsOpen(!isOpen)}
-        className="
-          w-full h-10 px-4
-          text-[13px] font-semibold text-slate-800 dark:text-slate-100
-          bg-slate-50 dark:bg-slate-800
-          rounded-2xl border border-slate-200 dark:border-slate-700
-          flex justify-between items-center
-          transition-all hover:bg-white dark:hover:bg-slate-700
-          focus:outline-none focus:ring-2 focus:ring-indigo-100 dark:focus:ring-indigo-900
-        "
+        onClick={() => setIsOpen((v) => !v)}
+        className="h-10 w-full rounded-xl px-3 text-[13px]
+          bg-white dark:bg-slate-900
+          border border-slate-200 dark:border-slate-700
+          text-slate-900 dark:text-slate-100
+          outline-none focus:ring-2 focus:ring-indigo-200/60 dark:focus:ring-indigo-900/40
+          flex items-center justify-between"
       >
-        <span className="truncate text-left">{displayValue}</span>
+        <span className="truncate text-left font-semibold">{displayValue}</span>
 
         <svg
           xmlns="http://www.w3.org/2000/svg"
@@ -183,7 +180,12 @@ const CustomDropdown: React.FC<CustomDropdownProps> = ({
       </button>
 
       {isOpen && (
-        <div className="absolute z-[100] mt-2 w-full min-w-[180px] bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+        <div className="absolute z-[100] mt-2 w-full min-w-[180px]
+          bg-white dark:bg-slate-900
+          border border-slate-200 dark:border-slate-700
+          rounded-xl shadow-xl overflow-hidden
+          animate-in fade-in zoom-in-95 duration-150"
+        >
           <div className="max-h-64 overflow-y-auto no-scrollbar">
             {onAddNew && (
               <button
@@ -192,7 +194,12 @@ const CustomDropdown: React.FC<CustomDropdownProps> = ({
                   onAddNew();
                   setIsOpen(false);
                 }}
-                className="w-full px-4 py-2 text-left text-[13px] font-semibold text-indigo-600 dark:text-indigo-400 hover:bg-slate-50 dark:hover:bg-slate-700 border-b border-slate-200 dark:border-slate-700 flex items-center gap-2 sticky top-0 bg-white dark:bg-slate-800 z-10"
+                className="w-full px-3 py-2 text-left text-[13px] font-semibold
+                  text-indigo-600 dark:text-indigo-400
+                  hover:bg-slate-50 dark:hover:bg-slate-800
+                  border-b border-slate-200 dark:border-slate-700
+                  flex items-center gap-2 sticky top-0
+                  bg-white dark:bg-slate-900 z-10"
               >
                 <PlusIcon /> Adicionar novo
               </button>
@@ -203,7 +210,11 @@ const CustomDropdown: React.FC<CustomDropdownProps> = ({
               const optValue = typeof opt === "string" ? opt : opt.value;
 
               return (
-                <div key={idx} className="flex items-center justify-between px-4 py-2 hover:bg-slate-50 dark:hover:bg-slate-700 transition">
+                <div
+                  key={idx}
+                  className="flex items-center justify-between px-3 py-2
+                    hover:bg-slate-50 dark:hover:bg-slate-800 transition"
+                >
                   <button
                     type="button"
                     className="text-left flex-1 text-[13px] font-medium text-slate-700 dark:text-slate-200"
@@ -215,10 +226,11 @@ const CustomDropdown: React.FC<CustomDropdownProps> = ({
                     {optLabel}
                   </button>
 
-                  {onDelete && optValue !== "Todas" && optValue !== "Selecione" && (
+                  {/* ✅ FIX: onDelete recebe ÍNDICE (idx), não string (optValue) */}
+                  {onDelete && optValue !== "Todas" && optValue !== "Todos" && optValue !== "Selecione" && (
                     <button
                       type="button"
-                      onClick={() => onDelete(optValue)}
+                      onClick={() => onDelete(idx)}
                       className="p-2 text-rose-500 hover:text-rose-700 dark:hover:text-rose-400"
                       title="Excluir"
                     >
@@ -234,6 +246,7 @@ const CustomDropdown: React.FC<CustomDropdownProps> = ({
     </div>
   );
 };
+
 
 
 const CustomDateInput: React.FC<{
@@ -252,8 +265,7 @@ const CustomDateInput: React.FC<{
       )}
 
       <div className="relative">
-        {/* ÍCONE À DIREITA (não bloqueia clique) */}
-        <div className="absolute right-3 top-1/2 -translate-y-1/2 text-indigo-600 pointer-events-none">
+        <div className="absolute right-3 top-1/2 -translate-y-1/2 text-indigo-600 opacity-70 pointer-events-none">
           <CalendarIcon />
         </div>
 
@@ -262,26 +274,22 @@ const CustomDateInput: React.FC<{
           value={value}
           onChange={(e) => onChange(e.target.value)}
           onClick={(e) => {
-            // força abrir o picker quando o browser suportar
             const el = e.currentTarget as any;
             try {
               el.showPicker?.();
             } catch {}
           }}
-         className="
-w-full p-2.5 pl-4 pr-10
-bg-slate-50 dark:bg-slate-800
-rounded-xl border border-slate-200 dark:border-slate-700
-font-bold text-slate-800 dark:text-slate-100
-outline-none focus:ring-2 focus:ring-indigo-100 dark:focus:ring-indigo-900
-shadow-sm transition-all text-sm
-"
-
+          className="h-10 w-full rounded-xl px-3 pr-10 text-[13px] font-semibold
+            bg-white dark:bg-slate-900
+            border border-slate-200 dark:border-slate-700
+            text-slate-900 dark:text-slate-100
+            outline-none focus:ring-2 focus:ring-indigo-200/60 dark:focus:ring-indigo-900/40"
         />
       </div>
     </div>
   );
 };
+
 
 
 
@@ -1096,9 +1104,13 @@ const App: React.FC = () => {
             {activeTab === 'transacoes' && (
               <div className="space-y-4 animate-in fade-in duration-500">
                 <div className="flex flex-col gap-4 pb-6 border-b border-slate-50 dark:border-slate-800">
-               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-12 gap-3 items-end">
+               <div
+  className="w-full overflow-visible
+    grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-[260px_1fr_1fr_220px_auto]
+    gap-3 items-center"
+>
   {/* MÊS */}
-  <div className="lg:col-span-3">
+  <div className="w-full">
     <CustomDateInput
       type="month"
       value={filtroMes}
@@ -1108,7 +1120,7 @@ const App: React.FC = () => {
   </div>
 
   {/* CATEGORIAS */}
-  <div className="lg:col-span-3">
+  <div className="w-full">
     <CustomDropdown
       placeholder="Categorias"
       value={filtroCategoria}
@@ -1119,7 +1131,7 @@ const App: React.FC = () => {
   </div>
 
   {/* C/C & CARTÕES */}
-  <div className="lg:col-span-3">
+  <div className="w-full">
     <CustomDropdown
       placeholder="C/C & Cartões"
       value={filtroMetodo}
@@ -1130,7 +1142,7 @@ const App: React.FC = () => {
   </div>
 
   {/* TIPO GASTO */}
-  <div className="lg:col-span-2">
+  <div className="w-full">
     <CustomDropdown
       placeholder="Tipo Gasto"
       value={filtroTipoGasto}
@@ -1141,11 +1153,16 @@ const App: React.FC = () => {
   </div>
 
   {/* LIMPAR */}
-  <div className="lg:col-span-1">
+  <div className="w-full lg:w-auto lg:justify-self-end">
     <button
       type="button"
       onClick={limparFiltros}
-      className="w-full h-10 rounded-xl px-4 text-sm font-semibold text-indigo-700 dark:text-indigo-300 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 transition"
+      className="h-10 w-full lg:w-auto px-4 rounded-xl whitespace-nowrap
+        border border-slate-200 dark:border-slate-700
+        bg-white dark:bg-slate-900
+        text-slate-700 dark:text-slate-200 text-sm font-semibold
+        hover:bg-slate-50 dark:hover:bg-slate-800
+        transition"
     >
       Limpar
     </button>
