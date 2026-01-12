@@ -201,7 +201,7 @@ const CustomDropdown: React.FC<CustomDropdownProps> = ({ label, value, options, 
   );
 };
 
-// --- COMPONENTE DE INPUT DE DATA PRO ---
+// ===== CustomDateInput (cole no lugar do seu, inteiro) =====
 const CustomDateInput: React.FC<{
   label?: string;
   value: string;
@@ -209,59 +209,48 @@ const CustomDateInput: React.FC<{
   type?: "date" | "month";
   className?: string;
 }> = ({ label, value, onChange, type = "date", className = "" }) => {
-  const inputRef = React.useRef<HTMLInputElement | null>(null);
-
-  const abrirPicker = () => {
-    const el = inputRef.current;
-    if (!el) return;
-
-    // Chrome/Edge suportam showPicker
-    const anyEl = el as any;
-    if (typeof anyEl.showPicker === "function") anyEl.showPicker();
-
-    // fallback
-    el.focus();
-    el.click();
-  };
-
   return (
-  <div className={`relative ${className}`}>
-    {label && (
-      <label className="block text-xs font-bold text-slate-400 dark:text-slate-500 uppercase mb-1.5">
-        {label}
-      </label>
-    )}
+    <div className={`relative ${className}`}>
+      {label && (
+        <label className="block text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase mb-1.5">
+          {label}
+        </label>
+      )}
 
-    <div className="relative group">
-      {/* ÍCONE: mês fica à direita, date fica à esquerda */}
-      <div
-        className={`absolute top-1/2 -translate-y-1/2 pointer-events-none transition-colors
-          ${type === "month" ? "right-3 text-indigo-600" : "left-3 text-slate-400 group-focus-within:text-indigo-500"}
-        `}
-      >
-        <CalendarIcon />
+      <div className="relative">
+        {/* Ícone roxo à DIREITA */}
+        <div className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-indigo-600 dark:text-indigo-400">
+          <CalendarIcon />
+        </div>
+
+        <input
+          type={type}
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          className="
+            w-full h-10
+            px-4 pr-10
+            rounded-xl
+            bg-slate-50 dark:bg-slate-800
+            border border-slate-200 dark:border-slate-700
+            text-[13px] text-slate-800 dark:text-slate-100
+            outline-none
+            focus:ring-2 focus:ring-indigo-100 dark:focus:ring-indigo-900
+            shadow-sm
+            appearance-none
+            [&::-webkit-calendar-picker-indicator]:opacity-0
+            [&::-webkit-calendar-picker-indicator]:absolute
+            [&::-webkit-calendar-picker-indicator]:right-0
+            [&::-webkit-calendar-picker-indicator]:w-10
+            [&::-webkit-calendar-picker-indicator]:h-10
+            [&::-webkit-calendar-picker-indicator]:cursor-pointer
+          "
+        />
       </div>
-
-      <input
-        type={type}
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        className={`
-          w-full h-10 text-sm font-medium shadow-sm transition-all outline-none rounded-xl
-          bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700
-          text-slate-900 dark:text-slate-100
-          focus:ring-2 focus:ring-indigo-100 dark:focus:ring-indigo-900
-          appearance-none
-          ${type === "month"
-            ? "pl-4 pr-10 text-left"   // <<< ESSA LINHA resolve o desalinhamento no mobile
-            : "pl-10 pr-3"
-          }
-        `}
-      />
     </div>
-  </div>
-);
+  );
 };
+
 
 
 const App: React.FC = () => {
