@@ -750,11 +750,11 @@ const App: React.FC = () => {
       </div>
     </div>
 
-    <div className="flex justify-end">
+    <div className="flex justify-end items-center h-11">
       <button
         type="button"
         onClick={() => setSettingsOpen(true)}
-        className="p-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white/80 dark:bg-slate-900/70 backdrop-blur hover:bg-slate-50 dark:hover:bg-slate-800 transition"
+        className="h-11 w-11 inline-flex items-center justify-center rounded-xl border border-slate-200 dark:border-slate-700 bg-white/80 dark:bg-slate-900/70 backdrop-blur hover:bg-slate-50 dark:hover:bg-slate-800 transition"
         title="Configurações"
       >
         <SettingsIcon />
