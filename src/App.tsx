@@ -755,17 +755,27 @@ const App: React.FC = () => {
         </p>
       </div>
     </div>
-     {/* BOTÃO SETTINGS (mobile topo-direita / desktop normal) */}
-   <div className="absolute right-4 top-1/2 -translate-y-1/2 md:static md:translate-y-0">
-      <button
-        type="button"
-        onClick={() => setSettingsOpen(true)}
-        className="p-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white/80 dark:bg-slate-900/70 backdrop-blur hover:bg-slate-50 dark:hover:bg-slate-800 transition"
-        title="Configurações"
-      >
-        <SettingsIcon />
-      </button>
-    </div>
+    <div className="relative w-full flex justify-center md:w-auto md:justify-start">
+  {/* ÍCONE ROXO (continua igual, só está dentro desse wrapper) */}
+  <div className="flex items-center justify-center w-11 h-11 rounded-xl bg-gradient-to-br from-indigo-600 to-violet-700 shadow-lg dark:shadow-[0_0_26px_rgba(255,255,255,0.28)]">
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+      <line x1="12" y1="20" x2="12" y2="10" />
+      <line x1="18" y1="20" x2="18" y2="4" />
+      <line x1="6" y1="20" x2="6" y2="16" />
+    </svg>
+  </div>
+
+  {/* SETTINGS (mesma altura do ícone no mobile / normal no desktop) */}
+  <button
+    type="button"
+    onClick={() => setSettingsOpen(true)}
+    className="absolute right-0 top-1/2 -translate-y-1/2 md:hidden p-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white/80 dark:bg-slate-900/70 backdrop-blur hover:bg-slate-50 dark:hover:bg-slate-800 transition"
+    title="Configurações"
+  >
+    <SettingsIcon />
+  </button>
+</div>
+
   </div>
 </header>
        
