@@ -1037,35 +1037,49 @@ const App: React.FC = () => {
             {activeTab === 'transacoes' && (
               <div className="space-y-4 animate-in fade-in duration-500">
                 <div className="flex flex-col gap-4 pb-6 border-b border-slate-50 dark:border-slate-800">
-                  <div className="flex flex-wrap gap-3 items-center">
-                    <CustomDateInput type="month" value={filtroMes} onChange={setFiltroMes} className="w-auto min-w-[140px]" />
-                    
-                    <CustomDropdown
-                      placeholder="Categorias"
-                      value={filtroCategoria}
-                      options={["Todas", ...todasCategorias]}
-                      onSelect={(val) => setFiltroCategoria(val === "Todas" ? "" : val)}
-                      className="min-w-[140px]"
-                    />
-                    
-                    <CustomDropdown
-                      placeholder="C/c & Cartões"
-                      value={filtroMetodo}
-                      options={["Todos", ...metodosPagamento.credito]}
-                      onSelect={(val) => setFiltroMetodo(val === "Todos" ? "" : val)}
-                      className="min-w-[140px]"
-                    />
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 items-end">
+  <CustomDateInput
+    type="month"
+    value={filtroMes}
+    onChange={setFiltroMes}
+    className="w-full"
+  />
 
-                    <CustomDropdown
-                      placeholder="Tipo Gasto"
-                      value={filtroTipoGasto}
-                      options={["Todos", "Fixo", "Variável"]}
-                      onSelect={(val) => setFiltroTipoGasto(val === "Todos" ? "" : val)}
-                      className="min-w-[140px]"
-                    />
+  <CustomDropdown
+    placeholder="Categorias"
+    value={filtroCategoria}
+    options={["Todas", ...todasCategorias]}
+    onSelect={(val) => setFiltroCategoria(val === "Todas" ? "" : val)}
+    className="w-full"
+  />
 
-                    <button type="button" onClick={limparFiltros} className="ml-auto text-xs font-black text-indigo-600 dark:text-indigo-400 uppercase hover:underline px-2 transition-all">Limpar Filtros</button>
-                  </div>
+  <CustomDropdown
+    placeholder="C/C & Cartões"
+    value={filtroMetodo}
+    options={["Todos", ...metodosPagamento.credito]}
+    onSelect={(val) => setFiltroMetodo(val === "Todos" ? "" : val)}
+    className="w-full"
+  />
+
+  <CustomDropdown
+    placeholder="Tipo Gasto"
+    value={filtroTipoGasto}
+    options={["Todos", "Fixo", "Variável"]}
+    onSelect={(val) => setFiltroTipoGasto(val === "Todos" ? "" : val)}
+    className="w-full"
+  />
+
+  <button
+    type="button"
+    onClick={limparFiltros}
+    className="w-full lg:w-auto lg:justify-self-end h-11 rounded-2xl px-4 text-sm font-bold
+      bg-slate-100 dark:bg-slate-800 text-indigo-700 dark:text-indigo-300
+      hover:bg-slate-200 dark:hover:bg-slate-700 transition"
+  >
+    Limpar filtros
+  </button>
+</div>
+
                   <div className="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider">{getFilteredTransactions.length} Lançamentos Encontrados</div>
                 </div>
                 <div className="space-y-3">
