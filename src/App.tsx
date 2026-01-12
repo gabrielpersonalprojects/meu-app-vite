@@ -242,9 +242,14 @@ const CustomDateInput: React.FC<{
   onChange: (val: string) => void;
   type?: "date" | "month";
   className?: string;
-}> = ({ label, value, onChange, type = "date", className = "" }) => {
+  compact?: boolean;
+}> = ({ label, value, onChange, type = "date", className = "", compact = false }) => {
+  const inputClasses = compact
+    ? "w-full h-9 px-3 pr-10 bg-slate-50 dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-100 outline-none focus:ring-2 focus:ring-indigo-100 dark:focus:ring-indigo-900 font-semibold text-sm transition-all shadow-sm"
+    : "w-full h-11 px-3 pr-10 bg-slate-50 dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-100 outline-none focus:ring-2 focus:ring-indigo-100 dark:focus:ring-indigo-900 font-semibold text-sm transition-all shadow-sm";
+
   return (
-    <div className={`w-full ${className}`}>
+    <div className={`relative ${className}`}>
       {label && (
         <label className="block text-xs font-bold text-slate-400 dark:text-slate-500 uppercase mb-1.5">
           {label}
@@ -252,40 +257,27 @@ const CustomDateInput: React.FC<{
       )}
 
       <div className="relative">
-        {/* ÍCONE À DIREITA (não bloqueia clique) */}
-        <div className="absolute right-3 top-1/2 -translate-y-1/2 text-indigo-600 pointer-events-none">
-          <CalendarIcon />
-        </div>
-
         <input
           type={type}
           value={value}
           onChange={(e) => onChange(e.target.value)}
           onClick={(e) => {
-            // força abrir o picker quando o browser suportar
-            const el = e.currentTarget as any;
-            try {
-              el.showPicker?.();
-            } catch {}
+            const el: any = e.currentTarget;
+            if (el?.showPicker) {
+              try { el.showPicker(); } catch {}
+            }
           }}
-          className="
-  w-full h-10
-  pl-4 pr-10
-  bg-slate-50 dark:bg-slate-800
-  rounded-xl
-  border border-slate-200 dark:border-slate-700
-  text-slate-900 dark:text-slate-100
-  outline-none
-  focus:ring-2 focus:ring-indigo-100 dark:focus:ring-indigo-900
-  transition-all
-  text-sm
-"
-
+          className={inputClasses}
         />
+
+        <div className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-indigo-600">
+          <CalendarIcon />
+        </div>
       </div>
     </div>
   );
 };
+
 
 
 
