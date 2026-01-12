@@ -112,7 +112,16 @@ interface CustomDropdownProps {
   className?: string;
 }
 
-const CustomDropdown: React.FC<CustomDropdownProps> = ({ label, value, options, onSelect, onDelete, onAddNew, placeholder = "Selecione", className = "" }) => {
+const CustomDropdown: React.FC<CustomDropdownProps> = ({
+  label,
+  value,
+  options,
+  onSelect,
+  onDelete,
+  onAddNew,
+  placeholder = "Selecione",
+  className = "",
+}) => {
   const [isOpen, setIsOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -122,67 +131,108 @@ const CustomDropdown: React.FC<CustomDropdownProps> = ({ label, value, options, 
         setIsOpen(false);
       }
     };
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
   const displayValue = useMemo(() => {
-    const found = (options as any[]).find(opt => 
-      typeof opt === 'string' ? opt === value : opt.value === value
+    const found = (options as any[]).find(
+      (opt) => (typeof opt === "string" ? opt === value : opt.value === value)
     );
-    if (found) {
-      return typeof found === 'string' ? found : found.label;
-    }
+    if (found) return typeof found === "string" ? found : found.label;
     return value || placeholder;
   }, [value, options, placeholder]);
 
   return (
     <div className={`relative ${className}`} ref={containerRef}>
-      {label && <label className="block text-xs font-bold text-slate-400 dark:text-slate-500 uppercase mb-1.5">{label}</label>}
+      {label && (
+        <label className="block text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase mb-1">
+          {label}
+        </label>
+      )}
+
       <button
         type="button"
-        onClick={() => setIsOpen(!isOpen)}
-        className="w-full p-2.5 bg-slate-50 dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-100 outline-none focus:ring-2 focus:ring-indigo-100 dark:focus:ring-indigo-900 font-medium text-sm text-left flex justify-between items-center transition-all hover:bg-slate-100 dark:hover:bg-slate-750 shadow-sm"
+        onClick={() => setIsOpen((v) => !v)}
+        className="h-10 w-full rounded-xl px-3 text-[13px]
+          bg-white dark:bg-slate-900
+          border border-slate-200 dark:border-slate-700
+          text-slate-900 dark:text-slate-100
+          outline-none focus:ring-2 focus:ring-indigo-200/60 dark:focus:ring-indigo-900/40
+          flex items-center justify-between"
       >
-        <span className="truncate">{displayValue}</span>
-        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={`transition-transform duration-200 opacity-50 ${isOpen ? 'rotate-180' : ''}`}><path d="m6 9 6 6 6-6"/></svg>
+        <span className="truncate text-left font-semibold">{displayValue}</span>
+
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="16"
+          height="16"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          className={`opacity-60 transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`}
+        >
+          <path d="m6 9 6 6 6-6" />
+        </svg>
       </button>
 
       {isOpen && (
-        <div className="absolute z-[100] mt-2 w-full min-w-[180px] bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+        <div className="absolute z-[100] mt-2 w-full min-w-[180px]
+          bg-white dark:bg-slate-900
+          border border-slate-200 dark:border-slate-700
+          rounded-xl shadow-xl overflow-hidden
+          animate-in fade-in zoom-in-95 duration-150"
+        >
           <div className="max-h-64 overflow-y-auto no-scrollbar">
             {onAddNew && (
               <button
                 type="button"
-                onClick={() => { onAddNew(); setIsOpen(false); }}
-                className="w-full px-4 py-3 text-left text-sm font-black text-indigo-600 dark:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 border-b border-slate-100 dark:border-slate-700 flex items-center gap-2 sticky top-0 bg-white dark:bg-slate-800 z-10"
+                onClick={() => {
+                  onAddNew();
+                  setIsOpen(false);
+                }}
+                className="w-full px-3 py-2 text-left text-[13px] font-semibold
+                  text-indigo-600 dark:text-indigo-400
+                  hover:bg-slate-50 dark:hover:bg-slate-800
+                  border-b border-slate-200 dark:border-slate-700
+                  flex items-center gap-2 sticky top-0
+                  bg-white dark:bg-slate-900 z-10"
               >
                 <PlusIcon /> Adicionar novo
               </button>
             )}
-            
-            {options.map((opt, idx) => {
-              const optLabel = typeof opt === 'string' ? opt : opt.label;
-              const optValue = typeof opt === 'string' ? opt : opt.value;
-              const isSelected = value === optValue;
-              
+
+            {(options as any[]).map((opt, idx) => {
+              const optLabel = typeof opt === "string" ? opt : opt.label;
+              const optValue = typeof opt === "string" ? opt : opt.value;
+
               return (
-                <div 
-                  key={`${optValue}-${idx}`}
-                  className={`group flex items-center justify-between px-4 py-3 hover:bg-slate-50 dark:hover:bg-slate-700/50 cursor-pointer transition-colors ${isSelected ? 'bg-indigo-50/30 dark:bg-indigo-900/10' : ''}`}
-                  onClick={() => { onSelect(optValue); setIsOpen(false); }}
+                <div
+                  key={idx}
+                  className="flex items-center justify-between px-3 py-2
+                    hover:bg-slate-50 dark:hover:bg-slate-800 transition"
                 >
-                  <span className={`text-sm truncate ${isSelected ? 'font-bold text-indigo-600 dark:text-indigo-400' : 'font-medium text-slate-700 dark:text-slate-300'}`}>{optLabel}</span>
-                  {onDelete && (
+                  <button
+                    type="button"
+                    className="text-left flex-1 text-[13px] font-medium text-slate-700 dark:text-slate-200"
+                    onClick={() => {
+                      onSelect(optValue);
+                      setIsOpen(false);
+                    }}
+                  >
+                    {optLabel}
+                  </button>
+
+                  {/* ✅ FIX: onDelete recebe ÍNDICE (idx), não string (optValue) */}
+                  {onDelete && optValue !== "Todas" && optValue !== "Todos" && optValue !== "Selecione" && (
                     <button
                       type="button"
-                      onMouseDown={(e) => e.stopPropagation()}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        onDelete(idx);
-                      }}
-                      className="p-1.5 text-slate-300 hover:text-rose-600 transition-all rounded-lg hover:bg-rose-50 dark:hover:bg-rose-900/20 opacity-0 group-hover:opacity-100"
-                      title="Excluir item"
+                      onClick={() => onDelete(idx)}
+                      className="p-2 text-rose-500 hover:text-rose-700 dark:hover:text-rose-400"
+                      title="Excluir"
                     >
                       <TrashIcon />
                     </button>
@@ -190,10 +240,6 @@ const CustomDropdown: React.FC<CustomDropdownProps> = ({ label, value, options, 
                 </div>
               );
             })}
-
-            {options.length === 0 && !onAddNew && (
-              <div className="px-4 py-6 text-xs text-slate-400 text-center italic">Nenhum item encontrado</div>
-            )}
           </div>
         </div>
       )}
@@ -201,31 +247,52 @@ const CustomDropdown: React.FC<CustomDropdownProps> = ({ label, value, options, 
   );
 };
 
-// --- COMPONENTE DE INPUT DE DATA PRO ---
+
+
 const CustomDateInput: React.FC<{
   label?: string;
   value: string;
   onChange: (val: string) => void;
-  type?: 'date' | 'month';
+  type?: "date" | "month";
   className?: string;
-}> = ({ label, value, onChange, type = 'date', className = "" }) => {
+}> = ({ label, value, onChange, type = "date", className = "" }) => {
   return (
-    <div className={`relative ${className}`}>
-      {label && <label className="block text-xs font-bold text-slate-400 dark:text-slate-500 uppercase mb-1.5">{label}</label>}
-      <div className="relative group">
-        <div className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none group-focus-within:text-indigo-500 transition-colors">
+    <div className={`w-full ${className}`}>
+      {label && (
+        <label className="block text-xs font-bold text-slate-400 dark:text-slate-500 uppercase mb-1.5">
+          {label}
+        </label>
+      )}
+
+      <div className="relative">
+        <div className="absolute right-3 top-1/2 -translate-y-1/2 text-indigo-600 opacity-70 pointer-events-none">
           <CalendarIcon />
         </div>
-        <input 
-          type={type} 
-          value={value} 
-          onChange={e => onChange(e.target.value)} 
-          className="w-full pl-10 pr-3 py-2.5 bg-slate-50 dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-100 outline-none focus:ring-2 focus:ring-indigo-100 dark:focus:ring-indigo-900 font-semibold text-sm transition-all shadow-sm" 
+
+        <input
+          type={type}
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          onClick={(e) => {
+            const el = e.currentTarget as any;
+            try {
+              el.showPicker?.();
+            } catch {}
+          }}
+          className="h-10 w-full rounded-xl px-3 pr-10 text-[13px] font-semibold
+            bg-white dark:bg-slate-900
+            border border-slate-200 dark:border-slate-700
+            text-slate-900 dark:text-slate-100
+            outline-none focus:ring-2 focus:ring-indigo-200/60 dark:focus:ring-indigo-900/40"
         />
       </div>
     </div>
   );
 };
+
+
+
+
 
 const App: React.FC = () => {
     const { confirm, toast } = useUI();
@@ -733,82 +800,82 @@ const App: React.FC = () => {
   return (
     <div className="min-h-screen pb-10 bg-slate-50 dark:bg-slate-950 transition-colors duration-300">
      <header className="border-slate-100 dark:border-slate-800 border-b bg-white dark:bg-slate-900 py-8 transition-colors">
-  <div className="container mx-auto px-4 relative flex flex-col md:flex-row md:justify-between md:items-center gap-4">
-    
-    {/* HEADER MOBILE */}
-<div className="md:hidden w-full">
-  {/* Linha do topo: ícone central + settings alinhado na mesma altura */}
-  <div className="grid grid-cols-3 items-center h-11">
-    <div /> {/* coluna vazia pra centralizar o ícone */}
-    <div className="flex justify-center">
-      <div className="flex items-center justify-center w-11 h-11 rounded-xl bg-gradient-to-br from-indigo-600 to-violet-700 shadow-lg dark:shadow-[0_0_26px_rgba(255,255,255,0.28)]">
-        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-          <line x1="12" y1="20" x2="12" y2="10" />
-          <line x1="18" y1="20" x2="18" y2="4" />
-          <line x1="6" y1="20" x2="6" y2="16" />
-        </svg>
+  <div className="container mx-auto px-4">
+    {/* MOBILE */}
+    <div className="md:hidden w-full">
+      {/* linha 1: ícone roxo no centro + settings à direita (mesma altura) */}
+      <div className="grid grid-cols-3 items-center">
+        <div />
+        <div className="flex justify-center">
+          <div className="flex items-center justify-center w-11 h-11 rounded-xl bg-gradient-to-br from-indigo-600 to-violet-700 shadow-lg shadow-indigo-100/50 dark:shadow-[0_0_26px_rgba(255,255,255,0.28)]">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <line x1="12" y1="20" x2="12" y2="10" />
+              <line x1="18" y1="20" x2="18" y2="4" />
+              <line x1="6" y1="20" x2="6" y2="16" />
+            </svg>
+          </div>
+        </div>
+
+        <div className="flex justify-end">
+          <button
+            type="button"
+            onClick={() => setSettingsOpen(true)}
+            className="p-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white/80 dark:bg-slate-900/70 backdrop-blur hover:bg-slate-50 dark:hover:bg-slate-800 transition"
+            title="Configurações"
+          >
+            <SettingsIcon />
+          </button>
+        </div>
+      </div>
+
+      {/* linha 2: texto centralizado */}
+      <div className="mt-3 text-center">
+        <div className="flex items-baseline gap-1.5 justify-center">
+          <span className="text-3xl font-montserrat font-extrabold text-slate-900 dark:text-white tracking-tight">Meu</span>
+          <span className="text-3xl font-montserrat font-bold text-slate-400 dark:text-slate-500 tracking-tight">Financeiro</span>
+        </div>
+
+        <p className="font-opensans font-light text-slate-400 dark:text-slate-500 text-base tracking-wide">
+          seu dinheiro, sua carteira, seu controle
+        </p>
       </div>
     </div>
 
-    <div className="flex justify-end items-center h-11">
+    {/* DESKTOP */}
+    <div className="hidden md:flex items-center justify-between">
+      <div className="flex items-center gap-5">
+        <div className="flex items-center justify-center w-11 h-11 rounded-xl bg-gradient-to-br from-indigo-600 to-violet-700 shadow-lg shadow-indigo-100/50 dark:shadow-[0_0_26px_rgba(255,255,255,0.28)]">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+            <line x1="12" y1="20" x2="12" y2="10" />
+            <line x1="18" y1="20" x2="18" y2="4" />
+            <line x1="6" y1="20" x2="6" y2="16" />
+          </svg>
+        </div>
+
+        <div className="flex flex-col">
+          <div className="flex items-baseline gap-1.5">
+            <span className="text-3xl font-montserrat font-extrabold text-slate-900 dark:text-white tracking-tight">Meu</span>
+            <span className="text-3xl font-montserrat font-bold text-slate-400 dark:text-slate-500 tracking-tight">Financeiro</span>
+          </div>
+
+          <p className="font-opensans font-light text-slate-400 dark:text-slate-500 text-base tracking-wide -mt-0.5">
+            seu dinheiro, sua carteira, seu controle
+          </p>
+        </div>
+      </div>
+
       <button
         type="button"
         onClick={() => setSettingsOpen(true)}
-        className="h-11 w-11 inline-flex items-center justify-center rounded-xl border border-slate-200 dark:border-slate-700 bg-white/80 dark:bg-slate-900/70 backdrop-blur hover:bg-slate-50 dark:hover:bg-slate-800 transition"
+        className="p-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white/80 dark:bg-slate-900/70 backdrop-blur hover:bg-slate-50 dark:hover:bg-slate-800 transition"
         title="Configurações"
       >
         <SettingsIcon />
       </button>
     </div>
   </div>
-
-  {/* Texto abaixo */}
-  <div className="mt-3 text-center">
-    <div className="flex items-baseline gap-1.5 justify-center">
-      <span className="text-3xl font-black text-slate-900 dark:text-white tracking-tight">Meu</span>
-      <span className="text-3xl font-bold text-slate-400 dark:text-slate-500 tracking-tight">Financeiro</span>
-    </div>
-    <p className="text-slate-400 dark:text-slate-500 font-medium text-base tracking-tight">
-      seu dinheiro, sua carteira, seu controle
-    </p>
-  </div>
-</div>
-
-{/* HEADER DESKTOP */}
-<div className="hidden md:flex w-full items-center justify-between">
-  <div className="flex items-center gap-5">
-    <div className="flex items-center justify-center w-11 h-11 rounded-xl bg-gradient-to-br from-indigo-600 to-violet-700 shadow-lg dark:shadow-[0_0_26px_rgba(255,255,255,0.28)]">
-      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-        <line x1="12" y1="20" x2="12" y2="10" />
-        <line x1="18" y1="20" x2="18" y2="4" />
-        <line x1="6" y1="20" x2="6" y2="16" />
-      </svg>
-    </div>
-
-    <div className="flex flex-col">
-      <div className="flex items-baseline gap-1.5">
-        <span className="text-3xl font-black text-slate-900 dark:text-white tracking-tight">Meu</span>
-        <span className="text-3xl font-bold text-slate-400 dark:text-slate-500 tracking-tight">Financeiro</span>
-      </div>
-      <p className="text-slate-400 dark:text-slate-500 font-medium text-base tracking-tight">
-        seu dinheiro, sua carteira, seu controle
-      </p>
-    </div>
-  </div>
-
-  <button
-    type="button"
-    onClick={() => setSettingsOpen(true)}
-    className="p-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white/80 dark:bg-slate-900/70 backdrop-blur hover:bg-slate-50 dark:hover:bg-slate-800 transition"
-    title="Configurações"
-  >
-    <SettingsIcon />
-  </button>
-</div>
-
-  </div>
 </header>
-       
+      
 
       <main className="container mx-auto px-4 mt-8 grid grid-cols-1 lg:grid-cols-12 gap-8">
         <div className="lg:col-span-4 space-y-6">
@@ -872,7 +939,7 @@ const App: React.FC = () => {
               <div className="flex gap-3">
                 <div className="flex-1">
                   <label className="block text-xs font-bold text-slate-400 dark:text-slate-500 uppercase mb-1.5">Valor (R$)</label>
-                  <input type="text" value={formValor} onChange={e => handleFormatCurrencyInput(e.target.value, setFormValor)} placeholder="0,00" className="w-full p-3 bg-slate-50 dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 font-bold text-slate-800 dark:text-slate-100 outline-none focus:ring-2 focus:ring-indigo-100 dark:focus:ring-indigo-900 shadow-sm" />
+                  <input type="text" value={formValor} onChange={e => handleFormatCurrencyInput(e.target.value, setFormValor)} placeholder="0,00" className="w-full p-2.5 bg-slate-50 dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 font-bold text-slate-800 dark:text-slate-100 outline-none focus:ring-2 focus:ring-indigo-100 dark:focus:ring-indigo-900 shadow-sm" />
                   <div className="mt-1.5 pl-1">
                     <label className="flex items-center gap-2 cursor-pointer select-none">
                       <input type="checkbox" checked={formPago} onChange={() => setFormPago(!formPago)} className="w-3.5 h-3.5 rounded text-indigo-600 border-slate-300 dark:border-slate-600 dark:bg-slate-800 focus:ring-0" />
@@ -1006,54 +1073,104 @@ const App: React.FC = () => {
             </div>
           </div>
           
-          <div className="bg-white dark:bg-slate-900 p-2 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-800 flex gap-2 overflow-x-auto no-scrollbar transition-colors">
-           {(["transacoes", "gastos", "projecao"] as TabType[]).map((tab) => (
-              <button key={tab} type="button" onClick={() => setActiveTab(tab)} className={`px-6 py-2.5 rounded-xl text-sm font-black transition-all whitespace-nowrap ${activeTab === tab ? 'bg-indigo-600 text-white shadow-md' : 'text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800'}`}>
-                {tab === "transacoes"
+         {/* MENU DE ABAS (mobile-first, alinhado e sem bagunça) */}
+<div className="p-2 transition-colors">
+  <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+    {(["transacoes", "gastos", "projecao"] as TabType[]).map((tab) => (
+      <button
+  key={tab}
+  type="button"
+  onClick={() => setActiveTab(tab)}
+  className={`h-10 rounded-2xl px-4 text-sm font-semibold transition-colors whitespace-nowrap shadow-sm
+  ${activeTab === tab
+    ? "bg-slate-900 text-white"
+    : "bg-indigo-600 text-white hover:bg-slate-900"
+  }`}
+>
+       {tab === "transacoes"
   ? "Transações"
   : tab === "gastos"
-  ? "Análise de Gastos"
-  : tab === "projecao"
-  ? "Projeção"
-  : "Ajustes"}
+  ? "Análise"
+  : "Projeção"}
 
-              </button>
-            ))}
-          </div>
+      </button>
+    ))}
+  </div>
+</div>
+
+
 
           <div className="bg-white dark:bg-slate-900 rounded-3xl p-6 shadow-sm border border-slate-100 dark:border-slate-800 min-h-[550px] transition-colors">
             {activeTab === 'transacoes' && (
               <div className="space-y-4 animate-in fade-in duration-500">
                 <div className="flex flex-col gap-4 pb-6 border-b border-slate-50 dark:border-slate-800">
-                  <div className="flex flex-wrap gap-3 items-center">
-                    <CustomDateInput type="month" value={filtroMes} onChange={setFiltroMes} className="w-auto min-w-[140px]" />
-                    
-                    <CustomDropdown
-                      placeholder="Categorias"
-                      value={filtroCategoria}
-                      options={["Todas", ...todasCategorias]}
-                      onSelect={(val) => setFiltroCategoria(val === "Todas" ? "" : val)}
-                      className="min-w-[140px]"
-                    />
-                    
-                    <CustomDropdown
-                      placeholder="C/c & Cartões"
-                      value={filtroMetodo}
-                      options={["Todos", ...metodosPagamento.credito]}
-                      onSelect={(val) => setFiltroMetodo(val === "Todos" ? "" : val)}
-                      className="min-w-[140px]"
-                    />
+               <div
+  className="w-full overflow-visible
+    grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-[260px_1fr_1fr_220px_auto]
+    gap-3 items-center"
+>
+  {/* MÊS */}
+  <div className="w-full">
+    <CustomDateInput
+      type="month"
+      value={filtroMes}
+      onChange={setFiltroMes}
+      className="w-full"
+    />
+  </div>
 
-                    <CustomDropdown
-                      placeholder="Tipo Gasto"
-                      value={filtroTipoGasto}
-                      options={["Todos", "Fixo", "Variável"]}
-                      onSelect={(val) => setFiltroTipoGasto(val === "Todos" ? "" : val)}
-                      className="min-w-[140px]"
-                    />
+  {/* CATEGORIAS */}
+  <div className="w-full">
+    <CustomDropdown
+      placeholder="Categorias"
+      value={filtroCategoria}
+      options={["Todas", ...todasCategorias]}
+      onSelect={(val) => setFiltroCategoria(val === "Todas" ? "" : val)}
+      className="w-full"
+    />
+  </div>
 
-                    <button type="button" onClick={limparFiltros} className="ml-auto text-xs font-black text-indigo-600 dark:text-indigo-400 uppercase hover:underline px-2 transition-all">Limpar Filtros</button>
-                  </div>
+  {/* C/C & CARTÕES */}
+  <div className="w-full">
+    <CustomDropdown
+      placeholder="C/C & Cartões"
+      value={filtroMetodo}
+      options={["Todos", ...metodosPagamento.credito]}
+      onSelect={(val) => setFiltroMetodo(val === "Todos" ? "" : val)}
+      className="w-full"
+    />
+  </div>
+
+  {/* TIPO GASTO */}
+  <div className="w-full">
+    <CustomDropdown
+      placeholder="Tipo Gasto"
+      value={filtroTipoGasto}
+      options={["Todos", "Fixo", "Variável"]}
+      onSelect={(val) => setFiltroTipoGasto(val === "Todos" ? "" : val)}
+      className="w-full"
+    />
+  </div>
+
+  {/* LIMPAR */}
+  <div className="w-full lg:w-auto lg:justify-self-end">
+    <button
+      type="button"
+      onClick={limparFiltros}
+      className="h-10 w-full lg:w-auto px-4 rounded-xl whitespace-nowrap
+        border border-slate-200 dark:border-slate-700
+        bg-white dark:bg-slate-900
+        text-slate-700 dark:text-slate-200 text-sm font-semibold
+        hover:bg-slate-50 dark:hover:bg-slate-800
+        transition"
+    >
+      Limpar
+    </button>
+  </div>
+</div>
+
+
+
                   <div className="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider">{getFilteredTransactions.length} Lançamentos Encontrados</div>
                 </div>
                 <div className="space-y-3">
@@ -1090,7 +1207,12 @@ const App: React.FC = () => {
                   </div>
                   <p className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-[0.25em] ml-4">Visão detalhada por categoria de consumo</p>
                   <div className="flex justify-center mt-4">
-                    <CustomDateInput type="month" value={filtroMes} onChange={setFiltroMes} className="w-auto min-w-[160px]" />
+                    <CustomDateInput
+  type="month"
+  value={filtroMes}
+  onChange={setFiltroMes}
+  className="w-full sm:w-[220px] lg:w-[220px]"
+/>
                   </div>
                 </div>
                 {spendingByCategoryData.length > 0 ? (
