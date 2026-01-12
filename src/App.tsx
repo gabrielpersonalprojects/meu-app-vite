@@ -1167,7 +1167,12 @@ const App: React.FC = () => {
                   </div>
                   <p className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-[0.25em] ml-4">Visão detalhada por categoria de consumo</p>
                   <div className="flex justify-center mt-4">
-                    <CustomDateInput type="month" value={filtroMes} onChange={setFiltroMes} className="w-auto min-w-[160px]" />
+                    <CustomDateInput
+  type="month"
+  value={filtroMes}
+  onChange={setFiltroMes}
+  className="w-full sm:w-[220px] lg:w-[220px]"
+/>
                   </div>
                 </div>
                 {spendingByCategoryData.length > 0 ? (
