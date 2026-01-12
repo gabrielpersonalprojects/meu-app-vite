@@ -1124,7 +1124,7 @@ const App: React.FC = () => {
 
         <button
           type="button"
-          onClick={() => setIsDarkMode(!isDarkMode)}
+          onClick={() => setIsDarkMode((prev) => !prev)}
           className="px-4 py-2.5 rounded-2xl font-semibold bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all active:scale-95"
         >
           {isDarkMode ? "Usar modo claro" : "Usar modo escuro"}
