@@ -1154,6 +1154,80 @@ const App: React.FC = () => {
           </div>
         </div>
       </main>
+{settingsOpen && (
+  <>
+    {/* FUNDO (clicar fora fecha) */}
+    <button
+      type="button"
+      className="fixed inset-0 z-[90] bg-slate-900/60 backdrop-blur-sm"
+      onClick={() => setSettingsOpen(false)}
+      aria-label="Fechar configurações"
+    />
+
+    {/* CAIXA DO MODAL */}
+    <div className="fixed inset-0 z-[95] flex items-center justify-center p-4">
+      <div className="w-full max-w-lg bg-white dark:bg-slate-900 rounded-[2.5rem] p-8 shadow-2xl border border-slate-100 dark:border-slate-800 animate-in zoom-in-95">
+        
+        {/* TOPO */}
+        <div className="flex items-center justify-between mb-6">
+          <h3 className="text-2xl font-black text-slate-900 dark:text-white">Configurações</h3>
+          <button
+            type="button"
+            onClick={() => setSettingsOpen(false)}
+            className="p-2 rounded-xl border border-slate-200 dark:border-slate-700 text-slate-500 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition"
+            title="Fechar"
+          >
+            ✕
+          </button>
+        </div>
+
+        {/* CONTEÚDO */}
+        <div className="space-y-4">
+
+          {/* TEMA */}
+          <div className="bg-slate-50 dark:bg-slate-800/30 border border-slate-100 dark:border-slate-800 rounded-3xl p-6 flex items-center justify-between">
+            <div>
+              <p className="text-sm font-semibold text-slate-800 dark:text-slate-100">Tema</p>
+              <p className="text-xs text-slate-400 dark:text-slate-500">
+                Alternar entre modo claro e escuro
+              </p>
+            </div>
+
+            <button
+              type="button"
+              onClick={() => setIsDarkMode((prev) => !prev)}
+              className="px-4 py-2.5 rounded-2xl font-semibold bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all active:scale-95"
+            >
+              {isDarkMode ? "Usar modo claro" : "Usar modo escuro"}
+            </button>
+          </div>
+
+          {/* LIMPAR DADOS */}
+          <div className="bg-slate-50 dark:bg-slate-800/30 border border-slate-100 dark:border-slate-800 rounded-3xl p-6 flex items-center justify-between">
+            <div>
+              <p className="text-sm font-semibold text-slate-800 dark:text-slate-100">Dados do app</p>
+              <p className="text-xs text-slate-400 dark:text-slate-500">
+                Apaga os dados do perfil atual
+              </p>
+            </div>
+
+            <button
+              type="button"
+              onClick={() => {
+                setSettingsOpen(false);
+                handleLimparDados();
+              }}
+              className="px-4 py-2.5 rounded-2xl font-semibold bg-rose-600 hover:bg-rose-700 text-white transition-all active:scale-95"
+            >
+              Limpar Dados
+            </button>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </>
+)}
 
       {editingTransaction && (
         <div className="fixed inset-0 z-[70] flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4">
