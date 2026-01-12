@@ -110,14 +110,18 @@ interface CustomDropdownProps {
   onAddNew?: () => void;
   placeholder?: string;
   className?: string;
-  compact?: boolean;
 }
 
 const CustomDropdown: React.FC<CustomDropdownProps> = ({
-  label, value, options, onSelect, onDelete, onAddNew, placeholder = "Selecione", className = "",
-  compact = false
+  label,
+  value,
+  options,
+  onSelect,
+  onDelete,
+  onAddNew,
+  placeholder = "Selecione",
+  className = "",
 }) => {
-
   const [isOpen, setIsOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -148,37 +152,35 @@ const CustomDropdown: React.FC<CustomDropdownProps> = ({
       )}
 
       <button
-  type="button"
-  onClick={() => setIsOpen(!isOpen)}
-  className={`w-full flex justify-between items-center transition-all
-    ${compact
-      ? "h-9 px-3 text-[13px] rounded-lg"
-      : "py-2.5 px-3 text-sm rounded-xl"
-    }
-    bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700
-    text-slate-800 dark:text-slate-100 outline-none
-    focus:ring-2 focus:ring-indigo-100 dark:focus:ring-indigo-900
-    font-medium shadow-sm
-  `}
->
-  <span className="truncate">{displayValue()}</span>
+        type="button"
+        onClick={() => setIsOpen(!isOpen)}
+        className="
+          w-full h-10 px-4
+          text-[13px] font-semibold text-slate-800 dark:text-slate-100
+          bg-slate-50 dark:bg-slate-800
+          rounded-2xl border border-slate-200 dark:border-slate-700
+          flex justify-between items-center
+          transition-all hover:bg-white dark:hover:bg-slate-700
+          focus:outline-none focus:ring-2 focus:ring-indigo-100 dark:focus:ring-indigo-900
+        "
+      >
+        <span className="truncate text-left">{displayValue}</span>
 
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    width="16"
-    height="16"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="2"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-    className={`transition-transform duration-200 opacity-50 ${isOpen ? "rotate-180" : ""}`}
-  >
-    <path d="m6 9 6 6 6-6" />
-  </svg>
-</button>
-
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="16"
+          height="16"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          className={`opacity-60 transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`}
+        >
+          <path d="m6 9 6 6 6-6" />
+        </svg>
+      </button>
 
       {isOpen && (
         <div className="absolute z-[100] mt-2 w-full min-w-[180px] bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-200">
@@ -238,32 +240,9 @@ const CustomDateInput: React.FC<{
   label?: string;
   value: string;
   onChange: (val: string) => void;
-  type?: 'date' | 'month';
+  type?: "date" | "month";
   className?: string;
-  compact?: boolean;
-}> = ({ label, value, onChange, type = 'date', className = '', compact = false }) => {
-  const inputClasses = compact
-    ? `
-      w-full h-9
-      pl-3 pr-10
-      bg-slate-50 dark:bg-slate-800
-      rounded-lg border border-slate-200 dark:border-slate-700
-      font-sans font-medium tabular-nums antialiased
-      text-slate-800 dark:text-slate-100
-      outline-none focus:ring-2 focus:ring-indigo-100 dark:focus:ring-indigo-900
-      shadow-sm transition-all text-[13px]
-    `
-    : `
-      w-full h-10
-      pl-4 pr-10
-      bg-slate-50 dark:bg-slate-800
-      rounded-xl border border-slate-200 dark:border-slate-700
-      font-sans font-medium tabular-nums antialiased
-      text-slate-800 dark:text-slate-100
-      outline-none focus:ring-2 focus:ring-indigo-100 dark:focus:ring-indigo-900
-      shadow-sm transition-all text-sm
-    `;
-
+}> = ({ label, value, onChange, type = "date", className = "" }) => {
   return (
     <div className={`w-full ${className}`}>
       {label && (
@@ -273,6 +252,7 @@ const CustomDateInput: React.FC<{
       )}
 
       <div className="relative">
+        {/* ÍCONE À DIREITA (não bloqueia clique) */}
         <div className="absolute right-3 top-1/2 -translate-y-1/2 text-indigo-600 pointer-events-none">
           <CalendarIcon />
         </div>
@@ -282,16 +262,26 @@ const CustomDateInput: React.FC<{
           value={value}
           onChange={(e) => onChange(e.target.value)}
           onClick={(e) => {
+            // força abrir o picker quando o browser suportar
             const el = e.currentTarget as any;
-            try { el.showPicker?.(); } catch {}
+            try {
+              el.showPicker?.();
+            } catch {}
           }}
-          className={inputClasses}
+         className="
+w-full p-2.5 pl-4 pr-10
+bg-slate-50 dark:bg-slate-800
+rounded-xl border border-slate-200 dark:border-slate-700
+font-bold text-slate-800 dark:text-slate-100
+outline-none focus:ring-2 focus:ring-indigo-100 dark:focus:ring-indigo-900
+shadow-sm transition-all text-sm
+"
+
         />
       </div>
     </div>
   );
 };
-
 
 
 
