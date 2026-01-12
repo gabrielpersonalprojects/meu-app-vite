@@ -738,6 +738,16 @@ const App: React.FC = () => {
             <div className="flex items-center justify-center w-11 h-11 rounded-xl bg-gradient-to-br from-indigo-600 to-violet-700 shadow-lg shadow-indigo-100/50">
                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="20" x2="12" y2="10"/><line x1="18" y1="20" x2="18" y2="4"/><line x1="6" y1="20" x2="6" y2="16"/></svg>
             </div>
+            <div className="flex items-center gap-3">
+  <button
+    type="button"
+    onClick={() => setSettingsOpen(true)}
+    className="p-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-800 transition"
+    title="Configurações"
+  >
+    <SettingsIcon />
+  </button>
+</div>
             <div className="flex flex-col">
               <div className="flex items-center">
                 <div className="flex items-baseline gap-1.5">
