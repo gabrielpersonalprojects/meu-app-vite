@@ -1020,12 +1020,12 @@ const App: React.FC = () => {
     : "bg-indigo-600 text-white hover:bg-slate-900"
   }`}
 >
-        {tab === "transacoes"
-          ? "Transações"
-          : tab === "gastos"
-          ? "Análise"
-          : tab === "projecao"
-          ? "Projeção"}
+       {tab === "transacoes"
+  ? "Transações"
+  : tab === "gastos"
+  ? "Análise"
+  : "Projeção"}
+
       </button>
     ))}
   </div>
