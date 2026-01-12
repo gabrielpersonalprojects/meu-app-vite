@@ -206,26 +206,67 @@ const CustomDateInput: React.FC<{
   label?: string;
   value: string;
   onChange: (val: string) => void;
-  type?: 'date' | 'month';
+  type?: "date" | "month";
   className?: string;
-}> = ({ label, value, onChange, type = 'date', className = "" }) => {
+}> = ({ label, value, onChange, type = "date", className = "" }) => {
+  const inputRef = React.useRef<HTMLInputElement | null>(null);
+
+  const abrirPicker = () => {
+    const el = inputRef.current;
+    if (!el) return;
+
+    // Chrome/Edge suportam showPicker
+    const anyEl = el as any;
+    if (typeof anyEl.showPicker === "function") anyEl.showPicker();
+
+    // fallback
+    el.focus();
+    el.click();
+  };
+
   return (
     <div className={`relative ${className}`}>
-      {label && <label className="block text-xs font-bold text-slate-400 dark:text-slate-500 uppercase mb-1.5">{label}</label>}
-      <div className="relative group">
-        <div className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none group-focus-within:text-indigo-500 transition-colors">
-          <CalendarIcon />
-        </div>
-        <input 
-          type={type} 
-          value={value} 
-          onChange={e => onChange(e.target.value)} 
-          className="w-full pl-10 pr-3 py-2.5 bg-slate-50 dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-100 outline-none focus:ring-2 focus:ring-indigo-100 dark:focus:ring-indigo-900 font-semibold text-sm transition-all shadow-sm" 
+      {label && (
+        <label className="block text-xs font-bold text-slate-400 dark:text-slate-500 uppercase mb-1.5">
+          {label}
+        </label>
+      )}
+
+      <div className="relative">
+        <input
+          ref={inputRef}
+          type={type}
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          className="
+            w-full h-11
+            rounded-2xl
+            border border-slate-200 dark:border-slate-700
+            bg-slate-50 dark:bg-slate-800
+            px-4 pr-12
+            text-left
+            text-slate-800 dark:text-slate-100
+            outline-none
+            focus:ring-2 focus:ring-indigo-100 dark:focus:ring-indigo-900
+            transition-all shadow-sm
+            appearance-none
+          "
         />
+
+        {/* Ícone roxo na DIREITA (no lugar do arrow) */}
+        <button
+          type="button"
+          onClick={abrirPicker}
+          className="absolute right-3 top-1/2 -translate-y-1/2 text-indigo-600 dark:text-indigo-400 [&_svg]:w-5 [&_svg]:h-5"
+          aria-label={type === "month" ? "Selecionar mês" : "Selecionar data"}
+        >
+          <CalendarIcon />
+        </button>
       </div>
     </div>
   );
 };
+
 
 const App: React.FC = () => {
     const { confirm, toast } = useUI();
