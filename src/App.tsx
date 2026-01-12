@@ -932,29 +932,48 @@ const App: React.FC = () => {
                   <input type="text" value={formDesc} onChange={e => setFormDesc(e.target.value)} placeholder="Ex: Mercado, Aluguel..." className="w-full p-3 bg-slate-50 dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 font-medium text-slate-800 dark:text-slate-100 outline-none focus:ring-2 focus:ring-indigo-100 dark:focus:ring-indigo-900" />
                 </div>
               )}
-              <div className="flex gap-3">
-                <div className="flex-1">
-                  <label className="block text-xs font-bold text-slate-400 dark:text-slate-500 uppercase mb-1.5">Valor (R$)</label>
-                  <input type="text" value={formValor} onChange={e => handleFormatCurrencyInput(e.target.value, setFormValor)} placeholder="0,00" className="w-full p-3 bg-slate-50 dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 font-bold text-slate-800 dark:text-slate-100 outline-none focus:ring-2 focus:ring-indigo-100 dark:focus:ring-indigo-900 shadow-sm" />
-                  <div className="mt-1.5 pl-1">
-                    <label className="flex items-center gap-2 cursor-pointer select-none">
-                      <input type="checkbox" checked={formPago} onChange={() => setFormPago(!formPago)} className="w-3.5 h-3.5 rounded text-indigo-600 border-slate-300 dark:border-slate-600 dark:bg-slate-800 focus:ring-0" />
-                      <span className="text-[10px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-tight">Pago</span>
-                    </label>
-                  </div>
-                </div>
-                <div className="flex-1">
-                  <CustomDateInput label="Data" value={formData} onChange={setFormData} />
-                </div>
-              </div>
-              {formTipo === 'despesa' && (
-                <div className="space-y-3">
-                  <label className="block text-xs font-bold text-slate-400 dark:text-slate-500 uppercase">Forma de Pagamento</label>
-                  <div className="grid grid-cols-2 gap-2">
-                    <button type="button" onClick={() => setIsParceladoMode(false)} className={`py-2 rounded-xl text-sm font-bold border transition-all ${isParceladoMode === false ? 'bg-slate-800 dark:bg-slate-100 border-slate-800 dark:border-slate-100 text-white dark:text-slate-900 shadow-sm' : 'bg-white dark:bg-slate-800 dark:border-slate-700 text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-700'}`}>À vista</button>
-                    <button type="button" onClick={() => setIsParceladoMode(true)} className={`py-2 rounded-xl text-sm font-bold border transition-all ${isParceladoMode === true ? 'bg-slate-800 dark:bg-slate-100 border-slate-800 dark:border-slate-100 text-white dark:text-slate-900 shadow-sm' : 'bg-white dark:bg-slate-800 dark:border-slate-700 text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-700'}`}>Parcelado</button>
-                  </div>
-                </div>
+              <div className="grid grid-cols-2 gap-3">
+  {/* VALOR + PAGO */}
+  <div>
+    <label className="block text-xs font-bold text-slate-400 dark:text-slate-500 uppercase mb-1.5">
+      Valor (R$)
+    </label>
+
+    <input
+      type="text"
+      value={formValor}
+      onChange={(e) => handleFormatCurrencyInput(e.target.value, setFormValor)}
+      placeholder="0,00"
+      className="w-full h-12 px-4 bg-slate-50 dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 font-bold text-slate-900 dark:text-slate-100 outline-none focus:ring-2 focus:ring-indigo-100 dark:focus:ring-indigo-900 transition"
+    />
+
+    <div className="mt-1.5 pl-1">
+      <label className="flex items-center gap-2 cursor-pointer select-none">
+        <input
+          type="checkbox"
+          checked={formPago}
+          onChange={(e) => setFormPago(e.target.checked)}
+          className="w-4 h-4 rounded text-indigo-600"
+        />
+        <span className="text-[10px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-wide">
+          Pago
+        </span>
+      </label>
+    </div>
+  </div>
+
+  {/* DATA */}
+  <div>
+    <CustomDateInput
+      label="Data"
+      type="date"
+      value={formData}
+      onChange={setFormData}
+      className="w-full"
+    />
+  </div>
+</div>
+
               )}
               <div className="grid grid-cols-2 gap-3">
                 <div className="flex-1">
