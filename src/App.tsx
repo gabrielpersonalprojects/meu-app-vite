@@ -148,35 +148,37 @@ const CustomDropdown: React.FC<CustomDropdownProps> = ({
       )}
 
       <button
-        type="button"
-        onClick={() => setIsOpen(!isOpen)}
-        className="
-          w-full h-10 px-4
-          text-[13px] font-semibold text-slate-800 dark:text-slate-100
-          bg-slate-50 dark:bg-slate-800
-          rounded-2xl border border-slate-200 dark:border-slate-700
-          flex justify-between items-center
-          transition-all hover:bg-white dark:hover:bg-slate-700
-          focus:outline-none focus:ring-2 focus:ring-indigo-100 dark:focus:ring-indigo-900
-        "
-      >
-        <span className="truncate text-left">{displayValue}</span>
+  type="button"
+  onClick={() => setIsOpen(!isOpen)}
+  className={`w-full flex justify-between items-center transition-all
+    ${compact
+      ? "h-9 px-3 text-[13px] rounded-lg"
+      : "py-2.5 px-3 text-sm rounded-xl"
+    }
+    bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700
+    text-slate-800 dark:text-slate-100 outline-none
+    focus:ring-2 focus:ring-indigo-100 dark:focus:ring-indigo-900
+    font-medium shadow-sm
+  `}
+>
+  <span className="truncate">{displayValue()}</span>
 
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          width="16"
-          height="16"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          className={`opacity-60 transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`}
-        >
-          <path d="m6 9 6 6 6-6" />
-        </svg>
-      </button>
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    width="16"
+    height="16"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    className={`transition-transform duration-200 opacity-50 ${isOpen ? "rotate-180" : ""}`}
+  >
+    <path d="m6 9 6 6 6-6" />
+  </svg>
+</button>
+
 
       {isOpen && (
         <div className="absolute z-[100] mt-2 w-full min-w-[180px] bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-200">
