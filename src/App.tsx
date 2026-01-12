@@ -1102,45 +1102,37 @@ const App: React.FC = () => {
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-12 gap-2 items-end">
   {/* MÊS (mais largo) */}
   <div className="lg:col-span-3">
-    <CustomDateInput
-      type="month"
-      value={filtroMes}
-      onChange={setFiltroMes}
-      className="w-full"
-    />
-  </div>
+   <CustomDateInput
+  type="month"
+  value={filtroMes}
+  onChange={setFiltroMes}
+  className="w-full sm:max-w-[220px]"
+/>
 
-  {/* CATEGORIA */}
-  <div className="lg:col-span-3">
-    <CustomDropdown
-      placeholder="Categorias"
-      value={filtroCategoria}
-      options={["Todas", ...todasCategorias]}
-      onSelect={(val) => setFiltroCategoria(val === "Todas" ? "" : val)}
-      className="w-full"
-    />
-  </div>
+<CustomDropdown
+  placeholder="Categorias"
+  value={filtroCategoria}
+  options={["Todas", ...todasCategorias]}
+  onSelect={(val) => setFiltroCategoria(val === "Todas" ? "" : val)}
+  className="w-full sm:max-w-[220px]"
+/>
 
-  {/* C/C & CARTÕES */}
-  <div className="lg:col-span-3">
-    <CustomDropdown
-      placeholder="C/C & Cartões"
-      value={filtroMetodo}
-      options={["Todos", ...metodosPagamento.credito]}
-      onSelect={(val) => setFiltroMetodo(val === "Todos" ? "" : val)}
-      className="w-full"
-    />
-  </div>
+<CustomDropdown
+  placeholder="C/C & Cartões"
+  value={filtroMetodo}
+  options={["Todos", ...metodosPagamento.credito]}
+  onSelect={(val) => setFiltroMetodo(val === "Todos" ? "" : val)}
+  className="w-full sm:max-w-[220px]"
+/>
 
-  {/* TIPO GASTO */}
-  <div className="lg:col-span-2">
-    <CustomDropdown
-      placeholder="Tipo Gasto"
-      value={filtroTipoGasto}
-      options={["Todos", "Fixo", "Variável"]}
-      onSelect={(val) => setFiltroTipoGasto(val === "Todos" ? "" : val)}
-      className="w-full"
-    />
+<CustomDropdown
+  placeholder="Tipo Gasto"
+  value={filtroTipoGasto}
+  options={["Todos", "Fixo", "Variável"]}
+  onSelect={(val) => setFiltroTipoGasto(val === "Todos" ? "" : val)}
+  className="w-full sm:max-w-[220px]"
+/>
+
   </div>
 
   {/* LIMPAR (bem menor, cara de “subitem”) */}
