@@ -175,3 +175,8 @@ input[type="month"]::-webkit-calendar-picker-indicator {
   cursor: pointer;
 }
 
+html, body, #root {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+}

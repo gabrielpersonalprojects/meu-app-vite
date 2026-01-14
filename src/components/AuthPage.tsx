@@ -1,0 +1,637 @@
+import { useMemo, useState, type FormEvent } from "react";
+import { supabase } from "../lib/supabase";
+
+type Mode = "login" | "signup" | "forgot";
+
+// sua logo em /public/logo.svg
+const LOGO_SRC = "/logo.svg";
+
+// NOVA paleta da marca (FluxMoney)
+const BRAND = {
+  from: "#220055",
+  to: "#4600ac",
+  glow: "#8b5cf6", // roxo claro p/ efeitos suaves
+};
+
+function traduzirErroSupabase(message?: string) {
+  const m = (message || "").toLowerCase();
+
+  if (m.includes("email not confirmed")) return "Você precisa confirmar seu e-mail antes de entrar.";
+  if (m.includes("invalid login credentials"))
+    return "E-mail ou senha inválidos. Se você ainda não tem conta, clique em “Criar conta”.";
+  if (m.includes("user already registered")) return "Esse e-mail já está cadastrado. Tente entrar.";
+  if (m.includes("password should be at least")) return "A senha precisa ter pelo menos 6 caracteres.";
+  if (m.includes("signup is disabled")) return "Cadastro desativado no momento.";
+  if (m.includes("rate limit")) return "Muitas tentativas. Aguarde um pouco e tente novamente.";
+
+  return message || "Ocorreu um erro. Tente novamente.";
+}
+
+function EyeIcon({ open }: { open: boolean }) {
+  return open ? (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+      <path d="M3 3l18 18" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+      <path
+        d="M10.58 10.58A2 2 0 0012 14a2 2 0 001.42-.58"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+      />
+      <path
+        d="M9.88 5.08A10.97 10.97 0 0112 5c7 0 10 7 10 7a18.2 18.2 0 01-3.26 4.39"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+      />
+      <path
+        d="M6.1 6.1A18.3 18.3 0 002 12s3 7 10 7c1.1 0 2.14-.17 3.11-.49"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+      />
+    </svg>
+  ) : (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+      <path
+        d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7z"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+      />
+      <path
+        d="M12 15a3 3 0 100-6 3 3 0 000 6z"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+      />
+    </svg>
+  );
+}
+
+function UserMiniIcon() {
+  return (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+      <path d="M20 21a8 8 0 10-16 0" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+      <path
+        d="M12 13a4 4 0 100-8 4 4 0 000 8z"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+      />
+    </svg>
+  );
+}
+
+function LockMiniIcon() {
+  return (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+      <path d="M7 11V8a5 5 0 0110 0v3" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+      <path d="M6 11h12v10H6V11z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+    </svg>
+  );
+}
+
+export default function AuthPage() {
+  const [mode, setMode] = useState<Mode>("login");
+
+  const [email, setEmail] = useState("");
+  const [senha, setSenha] = useState("");
+  const [confirmar, setConfirmar] = useState("");
+
+  const [showPass1, setShowPass1] = useState(false);
+  const [showPass2, setShowPass2] = useState(false);
+
+  const [rememberMe, setRememberMe] = useState(true);
+
+  const [loading, setLoading] = useState(false);
+  const [erro, setErro] = useState<string | null>(null);
+  const [msg, setMsg] = useState<string | null>(null);
+
+  const [lastEmail, setLastEmail] = useState<string>("");
+
+  const limparCampos = () => {
+    setEmail("");
+    setSenha("");
+    setConfirmar("");
+    setShowPass1(false);
+    setShowPass2(false);
+  };
+
+  const irParaLoginLimpo = () => {
+    setMode("login");
+    setErro(null);
+    limparCampos();
+  };
+
+  const irParaCadastro = () => {
+    setMode("signup");
+    setErro(null);
+    setMsg(null);
+    setSenha("");
+    setConfirmar("");
+    setShowPass1(false);
+    setShowPass2(false);
+  };
+
+  const irParaForgot = () => {
+    setMode("forgot");
+    setErro(null);
+    setMsg(null);
+    setSenha("");
+    setConfirmar("");
+    setShowPass1(false);
+    setShowPass2(false);
+  };
+
+  const mostrarReenviar = !!lastEmail && !!erro && erro.toLowerCase().includes("confirmar seu e-mail");
+
+  const hintRemember = useMemo(() => {
+    return rememberMe ? "Manter conectado" : "Não manter conectado (visual)";
+  }, [rememberMe]);
+
+  async function onEntrar(e: FormEvent) {
+    e.preventDefault();
+    setErro(null);
+    setMsg(null);
+    setLoading(true);
+
+    try {
+      const { error } = await supabase.auth.signInWithPassword({
+        email: email.trim(),
+        password: senha,
+      });
+      if (error) throw error;
+    } catch (err: any) {
+      const friendly = traduzirErroSupabase(err?.message);
+      setErro(friendly);
+
+      if ((err?.message || "").toLowerCase().includes("email not confirmed")) {
+        setLastEmail(email.trim());
+      }
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function onCriarConta(e: FormEvent) {
+    e.preventDefault();
+    setErro(null);
+    setMsg(null);
+
+    if (senha.length < 6) {
+      setErro("A senha precisa ter pelo menos 6 caracteres.");
+      return;
+    }
+    if (senha !== confirmar) {
+      setErro("As senhas não conferem.");
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const emailCriado = email.trim();
+
+      const { data, error } = await supabase.auth.signUp({
+        email: emailCriado,
+        password: senha,
+      });
+      if (error) throw error;
+
+      setLastEmail(emailCriado);
+
+      if (data?.session) {
+        await supabase.auth.signOut();
+      }
+
+      setMsg("Conta criada! Agora confirme seu e-mail (veja também o spam) e depois faça login.");
+      irParaLoginLimpo();
+    } catch (err: any) {
+      setErro(traduzirErroSupabase(err?.message));
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function onEnviarReset(e: FormEvent) {
+    e.preventDefault();
+    setErro(null);
+    setMsg(null);
+    setLoading(true);
+
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(email.trim(), {
+        redirectTo: `${window.location.origin}/reset-senha`,
+      });
+      if (error) throw error;
+
+      setMsg("Te enviamos um e-mail com o link para redefinir sua senha. Verifique também o spam.");
+      setMode("login");
+    } catch (err: any) {
+      setErro(traduzirErroSupabase(err?.message));
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function reenviarConfirmacao() {
+    setErro(null);
+    setMsg(null);
+
+    const alvo = (lastEmail || "").trim();
+    if (!alvo) {
+      setErro("Digite seu e-mail acima (ou tente entrar novamente) para reenviar a confirmação.");
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const authAny = supabase.auth as any;
+
+      if (typeof authAny.resend === "function") {
+        const { error } = await authAny.resend({ type: "signup", email: alvo });
+        if (error) throw error;
+
+        setMsg("Pronto! Reenviamos o e-mail de confirmação. Verifique sua caixa de entrada e o spam.");
+      } else {
+        setErro("Não consegui reenviar por código nesta versão. Se quiser, a gente atualiza o supabase-js.");
+      }
+    } catch (err: any) {
+      setErro(traduzirErroSupabase(err?.message));
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  return (
+    <div className="min-h-screen w-full flex items-center justify-center px-4">
+      {/* Fundo base (marca) */}
+      <div
+        className="fixed inset-0 -z-10"
+        style={{
+          background: `linear-gradient(180deg,
+            ${BRAND.from} 0%,
+            ${BRAND.to} 58%,
+            #07031b 100%)`,
+        }}
+      />
+
+      {/* Glow roxo sutil (inferior direito) */}
+      <div
+        className="fixed inset-0 -z-10"
+        style={{
+          background: `radial-gradient(900px 650px at 85% 85%,
+            rgba(70,0,172,0.22) 0%,
+            rgba(70,0,172,0.10) 28%,
+            rgba(70,0,172,0.00) 60%)`,
+        }}
+      />
+
+      {/* Luz geral no topo */}
+      <div
+        className="fixed inset-0 -z-10"
+        style={{
+          background: "radial-gradient(circle at top, rgba(255,255,255,0.14), transparent 55%)",
+        }}
+      />
+
+      <div className="w-full max-w-[420px] rounded-[28px] overflow-hidden shadow-2xl border border-white/15 bg-white/5 backdrop-blur-xl">
+        {/* Header */}
+        <div className="px-8 pt-8 pb-6">
+          <div className="flex flex-col items-center">
+            <img src={LOGO_SRC} alt="Logo" className="w-[225px] h-[225px] object-contain drop-shadow" />
+            <div className="mt-6 w-full h-px bg-white/20" />
+          </div>
+
+          <div className="mt-5 text-center">
+            <h1 className="text-white text-xl font-semibold tracking-wide">
+              {mode === "login" ? "Acesso" : mode === "signup" ? "Criar conta" : "Recuperar senha"}
+            </h1>
+            <p className="mt-1 text-white/70 text-sm">
+              {mode === "login"
+                ? "Entre com seu e-mail e senha."
+                : mode === "signup"
+                ? "Cadastre seu e-mail e defina sua senha."
+                : "Informe seu e-mail para receber o link."}
+            </p>
+          </div>
+
+          {erro && (
+            <div className="mt-5 rounded-xl border border-white/15 bg-black/25 text-white/90 p-3 text-sm">
+              <span className="text-rose-200 font-medium">Ops:</span> {erro}
+            </div>
+          )}
+
+          {msg && (
+            <div className="mt-5 rounded-xl border border-white/15 bg-black/20 text-white/90 p-3 text-sm">
+              {msg}
+            </div>
+          )}
+        </div>
+
+        {/* Corpo */}
+        <div className="px-8 pb-8">
+          {mode === "login" && (
+            <form onSubmit={onEntrar} className="space-y-3">
+              <div className="flex rounded-xl overflow-hidden border border-white/20 bg-white/10">
+                <div className="w-12 grid place-items-center text-white/70 border-r border-white/15">
+                  <UserMiniIcon />
+                </div>
+                <input
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="flex-1 h-12 px-4 bg-transparent text-white placeholder:text-white/50 outline-none"
+                  placeholder="E-mail"
+                  autoComplete="email"
+                />
+              </div>
+
+              <div className="flex rounded-xl overflow-hidden border border-white/20 bg-white/10">
+                <div className="w-12 grid place-items-center text-white/70 border-r border-white/15">
+                  <LockMiniIcon />
+                </div>
+                <input
+                  value={senha}
+                  onChange={(e) => setSenha(e.target.value)}
+                  type={showPass1 ? "text" : "password"}
+                  className="flex-1 h-12 px-4 bg-transparent text-white placeholder:text-white/50 outline-none"
+                  placeholder="Senha"
+                  autoComplete="current-password"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPass1((v) => !v)}
+                  className="w-12 grid place-items-center text-white/70 hover:text-white transition"
+                  aria-label={showPass1 ? "Ocultar senha" : "Mostrar senha"}
+                  title={showPass1 ? "Ocultar senha" : "Mostrar senha"}
+                >
+                  <EyeIcon open={showPass1} />
+                </button>
+              </div>
+
+              <div className="flex items-center justify-between pt-1">
+                <label className="flex items-center gap-2 text-white/70 text-sm select-none cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={rememberMe}
+                    onChange={(e) => setRememberMe(e.target.checked)}
+                    className="accent-purple-300"
+                    title={hintRemember}
+                  />
+                  Lembrar de mim
+                </label>
+
+                <button
+                  type="button"
+                  onClick={irParaForgot}
+                  className="text-white/70 text-sm hover:text-white hover:underline transition"
+                >
+                  Esqueci minha senha
+                </button>
+              </div>
+
+              {/* BOTÃO ENTRAR (marca) */}
+              <button
+                disabled={loading}
+                className="group relative overflow-hidden mt-4 h-12 max-w-[280px] w-full mx-auto block rounded-xl
+                           text-white font-semibold tracking-wide
+                           transition transform hover:scale-[1.01]
+                           hover:shadow-[0_14px_40px_rgba(70,0,172,0.22)]
+                           disabled:opacity-60"
+                style={{
+                  background: `linear-gradient(135deg,
+                    ${BRAND.from} 0%,
+                    ${BRAND.to} 82%,
+                    rgba(255,255,255,0.06) 100%)`,
+                  boxShadow: "0 10px 28px rgba(34,0,85,0.28)",
+                }}
+              >
+                <span
+                  aria-hidden="true"
+                  className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-200 group-hover:brightness-110"
+                  style={{
+                    background: `linear-gradient(135deg,
+                      ${BRAND.from} 0%,
+                      ${BRAND.to} 70%,
+                      rgba(139,92,246,0.22) 100%)`,
+                  }}
+                />
+                <span
+                  aria-hidden="true"
+                  className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+                  style={{
+                    background: `radial-gradient(120% 140% at 85% 85%,
+                      rgba(139,92,246,0.22) 0%,
+                      rgba(139,92,246,0.08) 45%,
+                      rgba(139,92,246,0.00) 70%)`,
+                  }}
+                />
+                <span className="relative z-10">{loading ? "Entrando..." : "ENTRAR"}</span>
+              </button>
+
+              {mostrarReenviar && (
+                <button
+                  type="button"
+                  onClick={reenviarConfirmacao}
+                  disabled={loading}
+                  className="w-full text-center text-white/70 text-sm hover:text-white hover:underline transition"
+                >
+                  Reenviar e-mail de confirmação
+                </button>
+              )}
+
+              <button
+                type="button"
+                onClick={irParaCadastro}
+                className="w-full text-center text-white/70 text-sm hover:text-white hover:underline transition"
+              >
+                Criar conta
+              </button>
+            </form>
+          )}
+
+          {mode === "signup" && (
+            <form onSubmit={onCriarConta} className="space-y-3">
+              <div className="flex rounded-xl overflow-hidden border border-white/20 bg-white/10">
+                <div className="w-12 grid place-items-center text-white/70 border-r border-white/15">
+                  <UserMiniIcon />
+                </div>
+                <input
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="flex-1 h-12 px-4 bg-transparent text-white placeholder:text-white/50 outline-none"
+                  placeholder="Cadastre seu e-mail de acesso"
+                  autoComplete="email"
+                />
+              </div>
+
+              <div className="flex rounded-xl overflow-hidden border border-white/20 bg-white/10">
+                <div className="w-12 grid place-items-center text-white/70 border-r border-white/15">
+                  <LockMiniIcon />
+                </div>
+                <input
+                  value={senha}
+                  onChange={(e) => setSenha(e.target.value)}
+                  type={showPass1 ? "text" : "password"}
+                  className="flex-1 h-12 px-4 bg-transparent text-white placeholder:text-white/50 outline-none"
+                  placeholder="Insira sua senha de acesso"
+                  autoComplete="new-password"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPass1((v) => !v)}
+                  className="w-12 grid place-items-center text-white/70 hover:text-white transition"
+                  aria-label={showPass1 ? "Ocultar senha" : "Mostrar senha"}
+                  title={showPass1 ? "Ocultar senha" : "Mostrar senha"}
+                >
+                  <EyeIcon open={showPass1} />
+                </button>
+              </div>
+
+              <div className="flex rounded-xl overflow-hidden border border-white/20 bg-white/10">
+                <div className="w-12 grid place-items-center text-white/70 border-r border-white/15">
+                  <LockMiniIcon />
+                </div>
+                <input
+                  value={confirmar}
+                  onChange={(e) => setConfirmar(e.target.value)}
+                  type={showPass2 ? "text" : "password"}
+                  className="flex-1 h-12 px-4 bg-transparent text-white placeholder:text-white/50 outline-none"
+                  placeholder="Confirme sua senha de acesso"
+                  autoComplete="new-password"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPass2((v) => !v)}
+                  className="w-12 grid place-items-center text-white/70 hover:text-white transition"
+                  aria-label={showPass2 ? "Ocultar senha" : "Mostrar senha"}
+                  title={showPass2 ? "Ocultar senha" : "Mostrar senha"}
+                >
+                  <EyeIcon open={showPass2} />
+                </button>
+              </div>
+
+              {/* BOTÃO CRIAR CONTA (marca) */}
+              <button
+                disabled={loading}
+                className="group relative overflow-hidden mt-4 h-12 max-w-[280px] w-full mx-auto block rounded-xl
+                           text-white font-semibold tracking-wide
+                           transition transform hover:scale-[1.01]
+                           hover:shadow-[0_14px_40px_rgba(70,0,172,0.22)]
+                           disabled:opacity-60"
+                style={{
+                  background: `linear-gradient(135deg,
+                    ${BRAND.from} 0%,
+                    ${BRAND.to} 82%,
+                    rgba(255,255,255,0.06) 100%)`,
+                  boxShadow: "0 10px 28px rgba(34,0,85,0.28)",
+                }}
+              >
+                <span
+                  aria-hidden="true"
+                  className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-200 group-hover:brightness-110"
+                  style={{
+                    background: `linear-gradient(135deg,
+                      ${BRAND.from} 0%,
+                      ${BRAND.to} 70%,
+                      rgba(139,92,246,0.22) 100%)`,
+                  }}
+                />
+                <span
+                  aria-hidden="true"
+                  className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+                  style={{
+                    background: `radial-gradient(120% 140% at 85% 85%,
+                      rgba(139,92,246,0.22) 0%,
+                      rgba(139,92,246,0.08) 45%,
+                      rgba(139,92,246,0.00) 70%)`,
+                  }}
+                />
+                <span className="relative z-10">{loading ? "Criando..." : "CRIAR CONTA"}</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  setMsg(null);
+                  setErro(null);
+                  irParaLoginLimpo();
+                }}
+                className="w-full text-center text-white/70 text-sm hover:text-white hover:underline transition"
+              >
+                Voltar para entrar
+              </button>
+            </form>
+          )}
+
+          {mode === "forgot" && (
+            <form onSubmit={onEnviarReset} className="space-y-3">
+              <div className="flex rounded-xl overflow-hidden border border-white/20 bg-white/10">
+                <div className="w-12 grid place-items-center text-white/70 border-r border-white/15">
+                  <UserMiniIcon />
+                </div>
+                <input
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="flex-1 h-12 px-4 bg-transparent text-white placeholder:text-white/50 outline-none"
+                  placeholder="Seu e-mail"
+                  autoComplete="email"
+                />
+              </div>
+
+              {/* BOTÃO ENVIAR LINK (marca) */}
+              <button
+                disabled={loading}
+                className="group relative overflow-hidden mt-4 h-12 max-w-[280px] w-full mx-auto block rounded-xl
+                           text-white font-semibold tracking-wide
+                           transition transform hover:scale-[1.01]
+                           hover:shadow-[0_14px_40px_rgba(70,0,172,0.22)]
+                           disabled:opacity-60"
+                style={{
+                  background: `linear-gradient(135deg,
+                    ${BRAND.from} 0%,
+                    ${BRAND.to} 82%,
+                    rgba(255,255,255,0.06) 100%)`,
+                  boxShadow: "0 10px 28px rgba(34,0,85,0.28)",
+                }}
+              >
+                <span
+                  aria-hidden="true"
+                  className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-200 group-hover:brightness-110"
+                  style={{
+                    background: `linear-gradient(135deg,
+                      ${BRAND.from} 0%,
+                      ${BRAND.to} 70%,
+                      rgba(139,92,246,0.22) 100%)`,
+                  }}
+                />
+                <span
+                  aria-hidden="true"
+                  className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+                  style={{
+                    background: `radial-gradient(120% 140% at 85% 85%,
+                      rgba(139,92,246,0.22) 0%,
+                      rgba(139,92,246,0.08) 45%,
+                      rgba(139,92,246,0.00) 70%)`,
+                  }}
+                />
+                <span className="relative z-10">{loading ? "Enviando..." : "ENVIAR LINK"}</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  setMsg(null);
+                  setErro(null);
+                  irParaLoginLimpo();
+                }}
+                className="w-full text-center text-white/70 text-sm hover:text-white hover:underline transition"
+              >
+                Voltar para entrar
+              </button>
+            </form>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}

@@ -1,5 +1,12 @@
+
+import AuthPage from "./components/AuthPage";
+import { supabase } from "./lib/supabase";
 import { useUI } from "./components/UIProvider";
-import React, { useState, useEffect, useMemo, useRef } from 'react';
+import logoSvg from "./assets/logo.svg";
+
+import { useEffect, useMemo, useRef, useState, type FC } from "react";
+import type { Session } from "@supabase/supabase-js";
+
 import { 
   Transaction, 
   TransactionType, 
@@ -294,13 +301,40 @@ const CustomDateInput: React.FC<{
 
 
 
-const App: React.FC = () => {
-    const { confirm, toast } = useUI();
+const App: FC = () => {
+  const handleLogout = async () => {
+  await supabase.auth.signOut();
+};
+  const [session, setSession] = useState<Session | null>(null);
+const [sessionLoading, setSessionLoading] = useState(true);
+const { confirm, toast } = useUI();
+
+useEffect(() => {
+  supabase.auth.getSession().then(({ data }) => {
+    setSession(data.session);
+    setSessionLoading(false);
+  });
+
+  const { data } = supabase.auth.onAuthStateChange((_event, sess) => {
+    setSession(sess);
+    setSessionLoading(false);
+  });
+
+  return () => {
+    data.subscription.unsubscribe();
+  };
+}, []);
+
+     
+
+
   const getHojeLocal = () => {
     const d = new Date();
     const ano = d.getFullYear();
     const mes = String(d.getMonth() + 1).padStart(2, '0');
     const dia = String(d.getDate()).padStart(2, '0');
+  
+
     return `${ano}-${mes}-${dia}`;
   };
 
@@ -796,84 +830,61 @@ const App: React.FC = () => {
   }, []);
 
   const activeProfile = profiles.find(p => p.id === activeProfileId) || profiles[0];
+if (!session) {
+  return <AuthPage />;
+}
 
   return (
     <div className="min-h-screen pb-10 bg-slate-50 dark:bg-slate-950 transition-colors duration-300">
-     <header className="border-slate-100 dark:border-slate-800 border-b bg-white dark:bg-slate-900 py-8 transition-colors">
+     <header className="border-b border-slate-200/70 dark:border-white/10 bg-white dark:bg-slate-900 py-6 transition-colors">
   <div className="container mx-auto px-4">
-    {/* MOBILE */}
-    <div className="md:hidden w-full">
-      {/* linha 1: ícone roxo no centro + settings à direita (mesma altura) */}
-      <div className="grid grid-cols-3 items-center">
-        <div />
-        <div className="flex justify-center">
-          <div className="flex items-center justify-center w-11 h-11 rounded-xl bg-gradient-to-br from-indigo-600 to-violet-700 shadow-lg shadow-indigo-100/50 dark:shadow-[0_0_26px_rgba(255,255,255,0.28)]">
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-              <line x1="12" y1="20" x2="12" y2="10" />
-              <line x1="18" y1="20" x2="18" y2="4" />
-              <line x1="6" y1="20" x2="6" y2="16" />
-            </svg>
-          </div>
-        </div>
+   {/* MOBILE */}
+<div className="md:hidden w-full px-4">
+  <div className="flex items-center justify-between">
+    <img
+      src="/logo_tela_do_app.svg"
+      alt="Logo"
+      className="h-12 w-auto select-none invert-0 dark:invert-0 dark:brightness-150 dark:contrast-110"
+    />
 
-        <div className="flex justify-end">
-          <button
-            type="button"
-            onClick={() => setSettingsOpen(true)}
-            className="p-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white/80 dark:bg-slate-900/70 backdrop-blur hover:bg-slate-50 dark:hover:bg-slate-800 transition"
-            title="Configurações"
-          >
-            <SettingsIcon />
-          </button>
-        </div>
-      </div>
+    <button
+  type="button"
+  onClick={() => setSettingsOpen(true)}
+  className="group p-2 rounded-xl border border-slate-200/70 dark:border-slate-700/60 bg-white/80 dark:bg-slate-900/70 backdrop-blur transition hover:bg-slate-50 dark:hover:bg-slate-800"
+  title="Configurações"
+>
+  <span className="text-slate-500 dark:text-slate-300 group-hover:text-indigo-600 dark:group-hover:text-indigo-300 transition-colors">
+    <SettingsIcon />
+  </span>
+</button>
 
-      {/* linha 2: texto centralizado */}
-      <div className="mt-3 text-center">
-        <div className="flex items-baseline gap-1.5 justify-center">
-          <span className="text-3xl font-montserrat font-extrabold text-slate-900 dark:text-white tracking-tight">Meu</span>
-          <span className="text-3xl font-montserrat font-bold text-slate-400 dark:text-slate-500 tracking-tight">Financeiro</span>
-        </div>
+  </div>
+</div>
 
-        <p className="font-opensans font-light text-slate-400 dark:text-slate-500 text-base tracking-wide">
-          seu dinheiro, sua carteira, seu controle
-        </p>
-      </div>
-    </div>
 
     {/* DESKTOP */}
-    <div className="hidden md:flex items-center justify-between">
-      <div className="flex items-center gap-5">
-        <div className="flex items-center justify-center w-11 h-11 rounded-xl bg-gradient-to-br from-indigo-600 to-violet-700 shadow-lg shadow-indigo-100/50 dark:shadow-[0_0_26px_rgba(255,255,255,0.28)]">
-          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-            <line x1="12" y1="20" x2="12" y2="10" />
-            <line x1="18" y1="20" x2="18" y2="4" />
-            <line x1="6" y1="20" x2="6" y2="16" />
-          </svg>
-        </div>
-
-        <div className="flex flex-col">
-          <div className="flex items-baseline gap-1.5">
-            <span className="text-3xl font-montserrat font-extrabold text-slate-900 dark:text-white tracking-tight">Meu</span>
-            <span className="text-3xl font-montserrat font-bold text-slate-400 dark:text-slate-500 tracking-tight">Financeiro</span>
-          </div>
-
-          <p className="font-opensans font-light text-slate-400 dark:text-slate-500 text-base tracking-wide -mt-0.5">
-            seu dinheiro, sua carteira, seu controle
-          </p>
-        </div>
-      </div>
-
-      <button
-        type="button"
-        onClick={() => setSettingsOpen(true)}
-        className="p-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white/80 dark:bg-slate-900/70 backdrop-blur hover:bg-slate-50 dark:hover:bg-slate-800 transition"
-        title="Configurações"
-      >
-        <SettingsIcon />
-      </button>
-    </div>
+<div className="hidden md:flex items-center justify-between px-4">
+  <div className="flex items-center gap-3">
+    <img
+      src="/logo_tela_do_app.svg"
+      alt="Logo"
+      className="h-12 w-auto select-none invert-0 dark:invert-0 dark:brightness-150 dark:contrast-110"
+    />
   </div>
+
+  <button
+  type="button"
+  onClick={() => setSettingsOpen(true)}
+  className="group p-2 rounded-xl border border-slate-200/70 dark:border-slate-700/60 bg-white/80 dark:bg-slate-900/70 backdrop-blur transition hover:bg-slate-50 dark:hover:bg-slate-800"
+  title="Configurações"
+>
+  <span className="text-slate-500 dark:text-slate-300 group-hover:text-indigo-600 dark:group-hover:text-indigo-300 transition-colors">
+    <SettingsIcon />
+  </span>
+</button>
+
+</div>
+</div>
 </header>
       
 
@@ -902,7 +913,11 @@ const App: React.FC = () => {
               </div>
             </div>
             {isEditingName ? (
-              <div className="space-y-3 animate-in fade-in duration-300"><label className="block text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest">Como podemos te chamar?</label><div className="flex gap-2"><input type="text" value={nameInput} onChange={e => setNameInput(e.target.value)} placeholder="Seu nome aqui..." className="flex-1 p-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none focus:ring-2 focus:ring-indigo-100 dark:focus:ring-indigo-900 font-bold text-sm text-slate-800 dark:text-slate-100" onKeyDown={(e) => e.key === 'Enter' && handleSaveName()} /><button onClick={handleSaveName} className="px-4 py-2 bg-indigo-600 text-white rounded-xl font-black text-xs uppercase shadow-sm hover:bg-indigo-700 transition-colors">OK</button></div></div>
+              <div className="space-y-3 animate-in fade-in duration-300"><label className="block text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest">Como podemos te chamar?</label><div className="flex gap-2"><input type="text" value={nameInput} onChange={e => setNameInput(e.target.value)} placeholder="Seu nome aqui..." className="flex-1 p-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none focus:ring-2 focus:ring-indigo-100 dark:focus:ring-indigo-900 font-bold text-sm text-slate-800 dark:text-slate-100" onKeyDown={(e) => e.key === 'Enter' && handleSaveName()} /><button onClick={handleSaveName} className="h-10 px-4 rounded-xl border border-slate-300 bg-slate-200/90 text-slate-900 font-semibold shadow-sm transition
+hover:bg-slate-200
+dark:border-slate-600 dark:bg-slate-700/70 dark:text-slate-100 dark:hover:bg-slate-700"
+
+>OK</button></div></div>
             ) : (
               <div className="flex items-center justify-between animate-in slide-in-from-top-2 duration-500">
                 <div>
@@ -925,9 +940,19 @@ const App: React.FC = () => {
             <div className="space-y-4">
               <div>
                 <label className="block text-xs font-bold text-slate-400 dark:text-slate-500 uppercase mb-1.5">O que é?</label>
-                <div className="grid grid-cols-2 gap-2">
-                  <button onClick={() => setFormTipo('despesa')} className={`py-2.5 rounded-xl font-bold border transition-all ${formTipo === 'despesa' ? 'bg-rose-600 border-rose-600 text-white shadow-sm' : 'bg-white dark:bg-slate-800 dark:border-slate-700 text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-700'}`}>Despesa</button>
-                  <button onClick={() => setFormTipo('receita')} className={`py-2.5 rounded-xl font-bold border transition-all ${formTipo === 'receita' ? 'bg-emerald-600 border-emerald-600 text-white shadow-sm' : 'bg-white dark:bg-slate-800 dark:border-slate-700 text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-700'}`}>Receita</button>
+                <div className="grid grid-cols-2 gap-2 p-1 rounded-2xl bg-slate-100/70 dark:bg-slate-800/50 border border-slate-200/70 dark:border-slate-700/60 backdrop-blur-xl">
+                  <button onClick={() => setFormTipo('despesa')} className={`w-full h-11 rounded-2xl text-sm font-semibold transition-all border backdrop-blur-xl
+  ${formTipo === "despesa"
+    ? "bg-rose-600/90 border-rose-500/40 text-white shadow-[0_14px_40px_-25px_rgba(225,29,72,0.85)]"
+    : "bg-white/70 dark:bg-slate-900/60 border-slate-200/70 dark:border-slate-800/70 text-slate-700 dark:text-slate-100 hover:bg-white/90 dark:hover:bg-slate-900/80"
+  }`}
+>Despesa</button>
+                  <button onClick={() => setFormTipo('receita')} className={`w-full h-11 rounded-2xl text-sm font-semibold transition-all border backdrop-blur-xl
+  ${formTipo === "receita"
+    ? "bg-emerald-600/90 border-emerald-500/40 text-white shadow-[0_14px_40px_-25px_rgba(5,150,105,0.85)]"
+    : "bg-white/70 dark:bg-slate-900/60 border-slate-200/70 dark:border-slate-800/70 text-slate-700 dark:text-slate-100 hover:bg-white/90 dark:hover:bg-slate-900/80"
+  }`}
+>Receita</button>
                 </div>
               </div>
               {formTipo === 'despesa' && (
@@ -955,8 +980,16 @@ const App: React.FC = () => {
                 <div className="space-y-3">
                   <label className="block text-xs font-bold text-slate-400 dark:text-slate-500 uppercase">Forma de Pagamento</label>
                   <div className="grid grid-cols-2 gap-2">
-                    <button type="button" onClick={() => setIsParceladoMode(false)} className={`py-2 rounded-xl text-sm font-bold border transition-all ${isParceladoMode === false ? 'bg-slate-800 dark:bg-slate-100 border-slate-800 dark:border-slate-100 text-white dark:text-slate-900 shadow-sm' : 'bg-white dark:bg-slate-800 dark:border-slate-700 text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-700'}`}>À vista</button>
-                    <button type="button" onClick={() => setIsParceladoMode(true)} className={`py-2 rounded-xl text-sm font-bold border transition-all ${isParceladoMode === true ? 'bg-slate-800 dark:bg-slate-100 border-slate-800 dark:border-slate-100 text-white dark:text-slate-900 shadow-sm' : 'bg-white dark:bg-slate-800 dark:border-slate-700 text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-700'}`}>Parcelado</button>
+                    <button type="button" onClick={() => setIsParceladoMode(false)} className={`py-2 rounded-xl text-xs font-bold border transition-all
+  ${isParceladoMode === false
+    ? "bg-slate-200/90 text-slate-900 border-slate-300 shadow-sm dark:bg-slate-700/70 dark:text-slate-100 dark:border-slate-600"
+    : "bg-white/70 text-slate-600 border-slate-200 hover:bg-white dark:bg-slate-900/30 dark:text-slate-300 dark:border-slate-700 dark:hover:bg-slate-800/50"
+  }`}>À vista</button>
+                    <button type="button" onClick={() => setIsParceladoMode(true)} className={`py-2 rounded-xl text-xs font-bold border transition-all
+  ${isParceladoMode === true
+    ? "bg-slate-200/90 text-slate-900 border-slate-300 shadow-sm dark:bg-slate-700/70 dark:text-slate-100 dark:border-slate-600"
+    : "bg-white/70 text-slate-600 border-slate-200 hover:bg-white dark:bg-slate-900/30 dark:text-slate-300 dark:border-slate-700 dark:hover:bg-slate-800/50"
+  }`}>Parcelado</button>
                   </div>
                 </div>
               )}
@@ -1000,8 +1033,18 @@ const App: React.FC = () => {
                 <div className="animate-in fade-in slide-in-from-top-1">
                   <label className="block text-xs font-bold text-slate-400 dark:text-slate-500 uppercase mb-1.5">Esse lançamento se repete?</label>
                   <div className="grid grid-cols-2 gap-2">
-                    <button type="button" onClick={() => setFormTipoGasto('')} className={`py-2.5 rounded-xl text-xs font-bold border transition-all ${formTipoGasto !== 'Fixo' ? 'bg-indigo-600 border-indigo-600 text-white shadow-md' : 'bg-slate-50 dark:bg-slate-800 dark:border-slate-700 text-slate-500 hover:bg-white dark:hover:bg-slate-700'}`}>NÃO</button>
-                    <button type="button" onClick={() => setFormTipoGasto('Fixo')} className={`py-2.5 rounded-xl text-xs font-bold border transition-all ${formTipoGasto === 'Fixo' ? 'bg-indigo-600 border-indigo-600 text-white shadow-md' : 'bg-slate-50 dark:bg-slate-800 dark:border-slate-700 text-slate-500 hover:bg-white dark:hover:bg-slate-700'}`}>SIM</button>
+                    <button type="button" onClick={() => setFormTipoGasto('')} className={`py-2.5 rounded-xl text-xs font-bold border transition-all
+  ${formTipoGasto
+    ? "bg-white/80 dark:bg-slate-900/70 border-slate-200/70 dark:border-slate-800/60 text-slate-500 dark:text-slate-300"
+    : "bg-slate-200/90 dark:bg-slate-700/70 border-slate-300 dark:border-slate-600 text-slate-900 dark:text-slate-100 shadow-sm"
+  }`}
+>NÃO</button>
+                    <button type="button" onClick={() => setFormTipoGasto('Fixo')} className={`py-2.5 rounded-xl text-xs font-bold border transition-all
+  ${formTipoGasto
+    ? "bg-slate-200/90 dark:bg-slate-700/70 border-slate-300 dark:border-slate-600 text-slate-900 dark:text-slate-100 shadow-sm"
+    : "bg-white/80 dark:bg-slate-900/70 border-slate-200/70 dark:border-slate-800/60 text-slate-500 dark:text-slate-300"
+  }`}
+>SIM</button>
                   </div>
                 </div>
               )}
@@ -1037,16 +1080,43 @@ const App: React.FC = () => {
                   <div>
                     <label className="block text-xs font-bold text-slate-400 dark:text-slate-500 uppercase mb-2">Este lançamento tem data final?</label>
                     <div className="grid grid-cols-2 gap-2">
-                      <button type="button" onClick={() => setIsFixaSemTermino(false)} className={`py-2.5 rounded-xl text-xs font-bold border transition-all ${!isFixaSemTermino ? 'bg-indigo-600 border-indigo-600 text-white shadow-md' : 'bg-slate-50 dark:bg-slate-800 dark:border-slate-700 text-slate-500 hover:bg-white dark:hover:bg-slate-700'}`}>Com prazo</button>
-                      <button type="button" onClick={() => setIsFixaSemTermino(true)} className={`py-2.5 rounded-xl text-xs font-bold border transition-all ${isFixaSemTermino ? 'bg-indigo-600 border-indigo-600 text-white shadow-md' : 'bg-slate-50 dark:bg-slate-800 dark:border-slate-700 text-slate-500 hover:bg-white dark:hover:bg-slate-700'}`}>Sem prazo</button>
-                    </div>
+  <button
+    type="button"
+    onClick={() => setIsFixaSemTermino(false)}
+    className={`py-2.5 rounded-xl text-xs font-bold border transition-all
+      ${!isFixaSemTermino
+        ? "bg-slate-200/90 border-slate-300 text-slate-900 shadow-sm dark:bg-slate-700/70 dark:border-slate-600 dark:text-slate-100"
+        : "bg-white border-slate-200 text-slate-500 hover:bg-slate-50 dark:bg-slate-900/70 dark:border-slate-800/60 dark:text-slate-300 dark:hover:bg-slate-900/80"
+      }`}
+  >
+    Com prazo
+  </button>
+
+  <button
+    type="button"
+    onClick={() => setIsFixaSemTermino(true)}
+    className={`py-2.5 rounded-xl text-xs font-bold border transition-all
+      ${isFixaSemTermino
+        ? "bg-slate-200/90 border-slate-300 text-slate-900 shadow-sm dark:bg-slate-700/70 dark:border-slate-600 dark:text-slate-100"
+        : "bg-white border-slate-200 text-slate-500 hover:bg-slate-50 dark:bg-slate-900/70 dark:border-slate-800/60 dark:text-slate-300 dark:hover:bg-slate-900/80"
+      }`}
+  >
+    Sem prazo
+  </button>
+</div>
+
                   </div>
                   {!isFixaSemTermino && (
                     <CustomDateInput label="Último lançamento em:" value={formDataTerminoFixa} onChange={setFormDataTerminoFixa} />
                   )}
                 </div>
               )}
-              <button type="button" onClick={handleAddTransaction} className="w-full py-4 bg-indigo-600 shadow-xl shadow-indigo-100 dark:shadow-none text-white font-semibold rounded-2xl hover:scale-[1.02] active:scale-95 transition-all tracking-wide mt-2"
+              <button type="button" onClick={handleAddTransaction} className="w-full py-4 rounded-2xl text-white font-semibold tracking-wide
+bg-gradient-to-r from-[#220055] to-[#4600ac]
+shadow-[0_16px_50px_-25px_rgba(34,0,85,0.85)]
+hover:brightness-110 active:brightness-95
+transition-all"
+
 >Efetuar Lançamento</button>
             </div>
           </div>
@@ -1054,18 +1124,48 @@ const App: React.FC = () => {
 
         <div className="lg:col-span-8 space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className="bg-[#0f172a] p-8 rounded-[2.5rem] shadow-xl relative flex flex-col justify-center min-h-[160px]">
-              <div className="absolute top-6 right-8 text-slate-500"><svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 12V7H5a2 2 0 0 1 0-4h14v4"/><path d="M3 5v14a2 2 0 0 0 2 2h16v-5"/><path d="M18 12a2 2 0 0 0 0 4h4v-4Z"/></svg></div>
-              <p className="text-[10px] font-black text-indigo-400 uppercase tracking-[0.25em] mb-4">Saldo Disponível</p>
-              <div className="space-y-2"><p className="text-4xl font-black text-white tracking-tight">{stats.saldoTotal.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</p><div className="w-12 h-1.5 bg-indigo-500 rounded-full opacity-80"></div></div>
-            </div>
-            <div className="bg-white dark:bg-slate-900 p-8 rounded-[2.5rem] border border-slate-100 dark:border-slate-800 shadow-sm flex flex-col justify-center min-h-[160px] relative transition-colors">
+           <div className="relative overflow-hidden rounded-2xl p-8 shadow-xl flex flex-col justify-center min-h-[160px] text-white
+bg-gradient-to-r from-[#220055] to-[#5A00D8]
+shadow-[0_18px_50px_-35px_rgba(70,0,172,0.9)]"> 
+
+  <div className="pointer-events-none absolute inset-0 bg-black/45" />
+  <div className="absolute inset-0 bg-black/20 backdrop-blur-xl" />
+  <div className="pointer-events-none absolute -top-24 -right-24 h-56 w-56 rounded-full bg-white/12 blur-3xl" />
+
+
+  <div className="relative">
+    <div className="absolute top-6 right-8 text-white/70">
+      <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <line x1="12" y1="20" x2="12" y2="10" />
+        <line x1="18" y1="20" x2="18" y2="4" />
+        <line x1="6" y1="20" x2="6" y2="16" />
+      </svg>
+    </div>
+
+    <p className="text-[10px] font-black text-white/80 uppercase tracking-[0.25em] mb-4">
+      Saldo Disponível
+    </p>
+
+    <div className="space-y-2">
+      <p className="text-4xl font-black text-white tracking-tight">
+        {stats.saldoTotal.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}
+      </p>
+    </div>
+  </div>
+</div>
+
+            
+            <div className="relative overflow-hidden rounded-2xl p-8 border border-slate-200/70 dark:border-slate-800/70 bg-white/80 dark:bg-slate-900/70 backdrop-blur-xl shadow-[0_18px_50px_-35px_rgba(0,0,0,0.35)] flex flex-col justify-center min-h-[160px] transition-colors"
+>
+  <div className="pointer-events-none absolute -top-24 -right-24 h-56 w-56 rounded-full bg-emerald-500/10 blur-3xl" />
               <div className="absolute top-6 right-8 p-2 bg-emerald-50 dark:bg-emerald-900/20 text-emerald-500 rounded-xl"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg></div>
               <p className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-[0.2em] mb-4">Entradas (Mês)</p>
               <p className="text-3xl font-black text-slate-900 dark:text-white tracking-tight">{formatarMoeda(stats.receitaMes)}</p>
               <p className="text-[10px] font-black uppercase tracking-wider text-slate-400 dark:text-slate-500 mt-1">Pendente: <span className="text-emerald-600 dark:text-emerald-400">{formatarMoeda(stats.pendenteReceita)}</span></p>
             </div>
-            <div className="bg-white dark:bg-slate-900 p-8 rounded-[2.5rem] border border-slate-100 dark:border-slate-800 shadow-sm flex flex-col justify-center min-h-[160px] relative transition-colors">
+            <div className="relative overflow-hidden rounded-2xl p-8 border border-slate-200/70 dark:border-slate-800/70 bg-white/80 dark:bg-slate-900/70 backdrop-blur-xl shadow-[0_18px_50px_-35px_rgba(0,0,0,0.35)] flex flex-col justify-center min-h-[160px] transition-colors">
+            <div className="pointer-events-none absolute -top-24 -right-24 h-56 w-56 rounded-full bg-rose-500/10 blur-3xl" />
+
               <div className="absolute top-6 right-8 p-2 bg-rose-50 dark:bg-rose-900/20 text-rose-500 rounded-xl"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="22 17 13.5 8.5 8.5 13.5 2 7"/><polyline points="16 17 22 17 22 11"/></svg></div>
               <p className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-[0.2em] mb-4">Saídas (Mês)</p>
               <p className="text-3xl font-black text-slate-900 dark:text-white tracking-tight">{formatarMoeda(stats.despesaMes)}</p>
@@ -1081,11 +1181,13 @@ const App: React.FC = () => {
   key={tab}
   type="button"
   onClick={() => setActiveTab(tab)}
-  className={`h-10 rounded-2xl px-4 text-sm font-semibold transition-colors whitespace-nowrap shadow-sm
+  className={`h-11 px-5 rounded-2xl border transition-all whitespace-nowrap backdrop-blur-xl
   ${activeTab === tab
-    ? "bg-slate-900 text-white"
-    : "bg-indigo-600 text-white hover:bg-slate-900"
-  }`}
+    ? "bg-gradient-to-r from-[#220055] to-[#4600ac] text-white border-white/10 shadow-[0_18px_50px_-35px_rgba(0,0,0,0.55)]"
+    : "bg-white/70 text-slate-800 border-slate-200 hover:bg-white/90 dark:bg-[#220055]/5 dark:text-slate-200 dark:border-white/10 dark:hover:bg-[#220055]/7"
+
+  }
+`}
 >
        {tab === "transacoes"
   ? "Transações"
@@ -1193,7 +1295,7 @@ const App: React.FC = () => {
                       </div>
                     </div>
                   )) : (
-                    <div className="py-20 text-center space-y-2"><p className="text-slate-400 dark:text-slate-500 font-medium">Nenhum registro encontrado para estes filtros.</p><button onClick={limparFiltros} className="text-indigo-600 dark:text-indigo-400 font-bold text-sm">Limpar todos os filtros</button></div>
+                    <div className="py-20 text-center space-y-2"><p className="text-xs leading-relaxed text-slate-500 dark:text-slate-400">Nenhum registro encontrado para estes filtros.</p></div>
                   )}
                 </div>
               </div>
@@ -1288,7 +1390,8 @@ const App: React.FC = () => {
 
     {/* CAIXA DO MODAL */}
     <div className="fixed inset-0 z-[95] flex items-center justify-center p-4">
-      <div className="w-full max-w-lg bg-white dark:bg-slate-900 rounded-[2.5rem] p-8 shadow-2xl border border-slate-100 dark:border-slate-800 animate-in zoom-in-95">
+      <div className="w-full max-w-md bg-white/90 dark:bg-slate-900/85 rounded-3xl p-6 sm:p-7 shadow-2xl border border-slate-200/70 dark:border-slate-700/60 backdrop-blur"
+>
         
         {/* TOPO */}
         <div className="flex items-center justify-between mb-6">
@@ -1301,49 +1404,79 @@ const App: React.FC = () => {
           >
             ✕
           </button>
+          
         </div>
 
         {/* CONTEÚDO */}
-        <div className="space-y-4">
+<div className="space-y-3">
+  {/* TEMA */}
+  <div className="rounded-2xl border border-slate-200/70 dark:border-slate-700/60 bg-slate-50/60 dark:bg-slate-800/30 px-4 py-3 flex items-center justify-between gap-4">
+    <div>
+      <p className="text-[13px] font-semibold text-slate-800 dark:text-slate-100">Tema</p>
+      <p className="text-[12px] text-slate-500 dark:text-slate-400">Alternar entre claro e escuro</p>
+    </div>
 
-          {/* TEMA */}
-          <div className="bg-slate-50 dark:bg-slate-800/30 border border-slate-100 dark:border-slate-800 rounded-3xl p-6 flex items-center justify-between">
-            <div>
-              <p className="text-sm font-semibold text-slate-800 dark:text-slate-100">Tema</p>
-              <p className="text-xs text-slate-400 dark:text-slate-500">
-                Alternar entre modo claro e escuro
-              </p>
-            </div>
+    <button
+      type="button"
+      onClick={() => setIsDarkMode((prev) => !prev)}
+      className="h-9 px-3 rounded-xl text-[13px] font-semibold whitespace-nowrap
+                 bg-white/70 dark:bg-slate-900/60
+                 border border-slate-200 dark:border-slate-700
+                 text-slate-800 dark:text-slate-100
+                 hover:bg-white dark:hover:bg-slate-900
+                 transition
+                 focus:outline-none focus:ring-2 focus:ring-indigo-200/60 dark:focus:ring-indigo-900/60"
+    >
+      {isDarkMode ? "Usar modo claro" : "Usar modo escuro"}
+    </button>
+  </div>
 
-            <button
-              type="button"
-              onClick={() => setIsDarkMode((prev) => !prev)}
-              className="px-4 py-2.5 rounded-2xl font-semibold bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all active:scale-95"
-            >
-              {isDarkMode ? "Usar modo claro" : "Usar modo escuro"}
-            </button>
-          </div>
+  {/* DADOS */}
+  <div className="rounded-2xl border border-slate-200/70 dark:border-slate-700/60 bg-slate-50/60 dark:bg-slate-800/30 px-4 py-3 flex items-center justify-between gap-4">
+    <div>
+      <p className="text-[13px] font-semibold text-slate-800 dark:text-slate-100">Dados do app</p>
+      <p className="text-[12px] text-slate-500 dark:text-slate-400">Apaga os dados do perfil atual</p>
+    </div>
 
-          {/* LIMPAR DADOS */}
-          <div className="bg-slate-50 dark:bg-slate-800/30 border border-slate-100 dark:border-slate-800 rounded-3xl p-6 flex items-center justify-between">
-            <div>
-              <p className="text-sm font-semibold text-slate-800 dark:text-slate-100">Dados do app</p>
-              <p className="text-xs text-slate-400 dark:text-slate-500">
-                Apaga os dados do perfil atual
-              </p>
-            </div>
+    <button
+      type="button"
+      onClick={() => {
+        setSettingsOpen(false);
+        handleLimparDados();
+      }}
+      className="h-9 px-3 rounded-xl text-[13px] font-semibold whitespace-nowrap
+  bg-rose-600 text-white hover:bg-rose-700 transition
+  focus:outline-none focus:ring-2 focus:ring-rose-200/70 dark:focus:ring-rose-900/60"
 
-            <button
-              type="button"
-              onClick={() => {
-                setSettingsOpen(false);
-                handleLimparDados();
-              }}
-              className="px-4 py-2.5 rounded-2xl font-semibold bg-rose-600 hover:bg-rose-700 text-white transition-all active:scale-95"
-            >
-              Limpar Dados
-            </button>
-          </div>
+    >
+      Limpar dados
+    </button>
+  </div>
+
+  {/* CONTA */}
+<div className="rounded-2xl border border-slate-200/70 dark:border-slate-700/60 bg-slate-50/80 dark:bg-slate-800/40 px-4 py-3 flex items-center justify-between gap-4">
+  <div>
+    <p className="text-[13px] font-semibold text-slate-800 dark:text-slate-100">Conta</p>
+    <p className="text-[12px] text-slate-500 dark:text-slate-400">Encerrar sessão deste usuário</p>
+  </div>
+
+  <button
+    type="button"
+    onClick={async () => {
+      await supabase.auth.signOut();
+      setSettingsOpen(false);
+    }}
+    className="h-9 px-3 rounded-xl text-[13px] font-semibold whitespace-nowrap
+  bg-rose-100 text-rose-700 hover:bg-rose-200 transition
+  dark:bg-rose-950/40 dark:text-rose-200 dark:hover:bg-rose-950/60
+  focus:outline-none focus:ring-2 focus:ring-rose-200/70 dark:focus:ring-rose-900/60"
+
+  >
+    Sair da conta
+  </button>
+</div>
+
+
 
         </div>
       </div>
