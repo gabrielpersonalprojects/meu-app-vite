@@ -358,7 +358,8 @@ useEffect(() => {
   const [userName, setUserName] = useState<string>('');
   const [isEditingName, setIsEditingName] = useState(false);
   const [nameInput, setNameInput] = useState('');
-  const [isDarkMode, setIsDarkMode] = useState(() => localStorage.getItem('theme') === 'dark');
+  const [isDarkMode, setIsDarkMode] = useState(() => (localStorage.getItem('theme') ?? 'dark') === 'dark');
+
 
   const [showModalMetodo, setShowModalMetodo] = useState(false);
   const [showModalCategoria, setShowModalCategoria] = useState(false);
@@ -372,6 +373,7 @@ useEffect(() => {
   const [inputNovoCartao, setInputNovoCartao] = useState('');
 
   const [filtroMes, setFiltroMes] = useState(getHojeLocal().substring(0, 7));
+  const [filtroLancamento, setFiltroLancamento] = useState<"todos" | "receita" | "despesa">("todos");
   const [filtroCategoria, setFiltroCategoria] = useState('');
   const [filtroMetodo, setFiltroMetodo] = useState('');
   const [filtroTipoGasto, setFiltroTipoGasto] = useState('');
@@ -390,6 +392,13 @@ useEffect(() => {
   
   const [isFixaSemTermino, setIsFixaSemTermino] = useState(true);
   const [formDataTerminoFixa, setFormDataTerminoFixa] = useState(getHojeLocal());
+
+  useEffect(() => {
+  setFiltroCategoria('');
+  setFiltroMetodo('');
+  setFiltroTipoGasto('');
+}, [filtroLancamento]);
+
 
   useEffect(() => {
   isDataLoadedRef.current = false;
@@ -513,6 +522,7 @@ useEffect(() => {
   const getFilteredTransactions = useMemo(() => {
     let list = [...transacoes];
     if (filtroMes) list = list.filter(t => t.data.startsWith(filtroMes));
+    if (filtroLancamento !== "todos") list = list.filter(t => t.tipo === filtroLancamento);
     if (filtroCategoria) list = list.filter(t => t.categoria === filtroCategoria);
     if (filtroMetodo) list = list.filter(t => t.qualCartao === filtroMetodo);
     if (filtroTipoGasto) list = list.filter(t => t.tipoGasto === filtroTipoGasto);
@@ -521,7 +531,23 @@ useEffect(() => {
       if (a.tipo === 'despesa' && b.tipo === 'receita') return 1;
       return new Date(b.data).getTime() - new Date(a.data).getTime();
     });
-  }, [transacoes, filtroMes, filtroCategoria, filtroMetodo, filtroTipoGasto]);
+  }, [transacoes, filtroMes, filtroLancamento, filtroCategoria, filtroMetodo, filtroTipoGasto]);
+  const totalFiltradoReceitas = useMemo(() => {
+  return getFilteredTransactions
+    .filter(t => t.tipo === 'receita')
+    .reduce((s, t) => s + (Number(t.valor) || 0), 0);
+}, [getFilteredTransactions]);
+
+const totalFiltradoDespesas = useMemo(() => {
+  return getFilteredTransactions
+    .filter(t => t.tipo === 'despesa')
+    .reduce((s, t) => s + Math.abs(Number(t.valor) || 0), 0);
+}, [getFilteredTransactions]);
+
+const totalFiltradoSaldo = useMemo(() => {
+  return totalFiltradoReceitas - totalFiltradoDespesas;
+}, [totalFiltradoReceitas, totalFiltradoDespesas]);
+
 
   const stats = useMemo(() => {
     const saldoAnterior = transacoes
@@ -818,8 +844,19 @@ useEffect(() => {
   toast(`"${novo}" adicionado.`, "success");
 };
 
-  const todasCategorias = useMemo(() => [...new Set([...categorias.despesa, ...categorias.receita])].sort(), [categorias]);
-  const limparFiltros = () => { setFiltroMes(getHojeLocal().substring(0, 7)); setFiltroCategoria(''); setFiltroMetodo(''); setFiltroTipoGasto(''); };
+  const categoriasFiltradasTransacoes = useMemo(() => {
+  if (filtroLancamento === "receita") return [...categorias.receita].sort();
+  if (filtroLancamento === "despesa") return [...categorias.despesa].sort();
+  return [...new Set([...categorias.despesa, ...categorias.receita])].sort();
+}, [categorias, filtroLancamento]);
+const limparFiltros = () => {
+  setFiltroMes(getHojeLocal().substring(0, 7));
+  setFiltroLancamento("todos");
+  setFiltroCategoria('');
+  setFiltroMetodo('');
+  setFiltroTipoGasto('');
+};
+
   
   // Saudação Pro com ícones realistas
   const greetingInfo = useMemo(() => { 
@@ -1174,20 +1211,21 @@ shadow-[0_18px_50px_-35px_rgba(70,0,172,0.9)]">
           </div>
           
          {/* MENU DE ABAS (mobile-first, alinhado e sem bagunça) */}
-<div className="p-2 transition-colors">
-  <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+<div className="px-0 pt-2 pb-0">
+  <div className="grid grid-cols-3 gap-4">
     {(["transacoes", "gastos", "projecao"] as TabType[]).map((tab) => (
       <button
   key={tab}
   type="button"
   onClick={() => setActiveTab(tab)}
-  className={`h-11 px-5 rounded-2xl border transition-all whitespace-nowrap backdrop-blur-xl
+  className={`h-14 px-5 rounded-2xl transition-all whitespace-nowrap
   ${activeTab === tab
-    ? "bg-gradient-to-r from-[#220055] to-[#4600ac] text-white border-white/10 shadow-[0_18px_50px_-35px_rgba(0,0,0,0.55)]"
-    : "bg-white/70 text-slate-800 border-slate-200 hover:bg-white/90 dark:bg-[#220055]/5 dark:text-slate-200 dark:border-white/10 dark:hover:bg-[#220055]/7"
-
+    ? "bg-gradient-to-r from-[#220055] to-[#4600ac] text-white ring-1 ring-white/0 shadow-sm"
+    : "bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-200 ring-1 ring-slate-200 dark:ring-slate-800 shadow-sm hover:bg-slate-50 dark:hover:bg-slate-800/60"
   }
 `}
+
+
 >
        {tab === "transacoes"
   ? "Transações"
@@ -1207,12 +1245,10 @@ shadow-[0_18px_50px_-35px_rgba(70,0,172,0.9)]">
               <div className="space-y-4 animate-in fade-in duration-500">
                 <div className="flex flex-col gap-4 pb-6 border-b border-slate-50 dark:border-slate-800">
                <div
-  className="w-full overflow-visible
-    grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-[260px_1fr_1fr_220px_auto]
-    gap-3 items-center"
+  className="w-full overflow-visible grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-12 gap-3 items-center"
 >
   {/* MÊS */}
-  <div className="w-full">
+  <div className="w-full lg:col-span-3">
     <CustomDateInput
       type="month"
       value={filtroMes}
@@ -1221,19 +1257,44 @@ shadow-[0_18px_50px_-35px_rgba(70,0,172,0.9)]">
     />
   </div>
 
-  {/* CATEGORIAS */}
-  <div className="w-full">
+    {/* LANÇAMENTO */}
+  <div className="w-full lg:col-span-3">
     <CustomDropdown
-      placeholder="Categorias"
-      value={filtroCategoria}
-      options={["Todas", ...todasCategorias]}
-      onSelect={(val) => setFiltroCategoria(val === "Todas" ? "" : val)}
+      placeholder="Lançamento"
+      value={
+        filtroLancamento === "todos"
+          ? "Entradas + Saídas"
+          : filtroLancamento === "receita"
+          ? "Entradas"
+          : "Saídas"
+      }
+      options={["Entradas + Saídas", "Entradas", "Saídas"]}
+      onSelect={(val) => {
+        if (val === "Entradas") setFiltroLancamento("receita");
+        else if (val === "Saídas") setFiltroLancamento("despesa");
+        else setFiltroLancamento("todos");
+      }}
       className="w-full"
     />
   </div>
 
+{/* CATEGORIAS */}
+ {filtroLancamento !== "todos" && (
+  <div className="w-full lg:col-span-3">
+    <CustomDropdown
+      placeholder="Categorias"
+      value={filtroCategoria}
+      options={["Todas", ...categoriasFiltradasTransacoes]}
+      onSelect={(val) => setFiltroCategoria(val === "Todas" ? "" : val)}
+      className="w-full"
+    />
+  </div>
+)}
+
+
   {/* C/C & CARTÕES */}
-  <div className="w-full">
+{filtroLancamento !== "todos" && (
+  <div className="w-full lg:col-span-3">
     <CustomDropdown
       placeholder="C/C & Cartões"
       value={filtroMetodo}
@@ -1242,9 +1303,12 @@ shadow-[0_18px_50px_-35px_rgba(70,0,172,0.9)]">
       className="w-full"
     />
   </div>
+)}
 
-  {/* TIPO GASTO */}
-  <div className="w-full">
+
+ {/* TIPO GASTO */}
+{filtroLancamento === "despesa" && (
+  <div className="w-full lg:col-span-2">
     <CustomDropdown
       placeholder="Tipo Gasto"
       value={filtroTipoGasto}
@@ -1253,13 +1317,16 @@ shadow-[0_18px_50px_-35px_rgba(70,0,172,0.9)]">
       className="w-full"
     />
   </div>
+)}
+
+
 
   {/* LIMPAR */}
-  <div className="w-full lg:w-auto lg:justify-self-end">
+  <div className="w-full lg:col-span-2 lg:justify-self-end">
     <button
       type="button"
       onClick={limparFiltros}
-      className="h-10 w-full lg:w-auto px-4 rounded-xl whitespace-nowrap
+      className="h-10 w-full sm:w-auto px-4 rounded-xl whitespace-nowrap-nowrap
         border border-slate-200 dark:border-slate-700
         bg-white dark:bg-slate-900
         text-slate-700 dark:text-slate-200 text-sm font-semibold
@@ -1271,6 +1338,47 @@ shadow-[0_18px_50px_-35px_rgba(70,0,172,0.9)]">
   </div>
 </div>
 
+<div className="flex flex-wrap items-center gap-3 text-[11px] text-slate-500 dark:text-slate-400">
+  {filtroLancamento === "receita" ? (
+    <div className="flex items-center gap-2">
+      <span className="uppercase tracking-wider font-bold">Total (Entradas):</span>
+      <span className="font-black text-emerald-600 dark:text-emerald-400">
+        {formatarMoeda(totalFiltradoReceitas)}
+      </span>
+    </div>
+  ) : filtroLancamento === "despesa" ? (
+    <div className="flex items-center gap-2">
+      <span className="uppercase tracking-wider font-bold">Total (Saídas):</span>
+      <span className="font-black text-rose-600 dark:text-rose-400">
+        {formatarMoeda(totalFiltradoDespesas)}
+      </span>
+    </div>
+  ) : (
+    <>
+      <div className="flex items-center gap-2">
+        <span className="uppercase tracking-wider font-bold">Entradas:</span>
+        <span className="font-black text-emerald-600 dark:text-emerald-400">
+          {formatarMoeda(totalFiltradoReceitas)}
+        </span>
+      </div>
+      <div className="flex items-center gap-2">
+        <span className="uppercase tracking-wider font-bold">Saídas:</span>
+        <span className="font-black text-rose-600 dark:text-rose-400">
+          {formatarMoeda(totalFiltradoDespesas)}
+        </span>
+      </div>
+      <div className="flex items-center gap-2">
+        <span className="uppercase tracking-wider font-bold">Saldo:</span>
+        <span className={`font-black ${totalFiltradoSaldo >= 0 ? "text-emerald-600 dark:text-emerald-400" : "text-rose-600 dark:text-rose-400"}`}>
+          {formatarMoeda(totalFiltradoSaldo)}
+        </span>
+      </div>
+    </>
+  )}
+
+  <span className="text-slate-300 dark:text-slate-700">•</span>
+  <span className="font-bold">{getFilteredTransactions.length} lançamentos</span>
+</div>
 
 
                   <div className="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider">{getFilteredTransactions.length} Lançamentos Encontrados</div>
