@@ -369,16 +369,6 @@ export default function AuthPage() {
               </div>
 
               <div className="flex items-center justify-between pt-1">
-                <label className="flex items-center gap-2 text-white/70 text-sm select-none cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={rememberMe}
-                    onChange={(e) => setRememberMe(e.target.checked)}
-                    className="accent-purple-300"
-                    title={hintRemember}
-                  />
-                  Lembrar de mim
-                </label>
 
                 <button
                   type="button"

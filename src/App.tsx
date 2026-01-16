@@ -3,6 +3,7 @@ import AuthPage from "./components/AuthPage";
 import { supabase } from "./lib/supabase";
 import { useUI } from "./components/UIProvider";
 import logoSvg from "./assets/logo.svg";
+const SEM_PRAZO_MESES = 60;
 
 import { useEffect, useMemo, useRef, useState, type FC } from "react";
 import type { Session } from "@supabase/supabase-js";
@@ -305,9 +306,18 @@ const App: FC = () => {
   const handleLogout = async () => {
   await supabase.auth.signOut();
 };
-  const [session, setSession] = useState<Session | null>(null);
+const [session, setSession] = useState<Session | null>(null);
 const [sessionLoading, setSessionLoading] = useState(true);
 const { confirm, toast } = useUI();
+
+const hoje = (() => {
+  const d = new Date();
+  const ano = d.getFullYear();
+  const mes = String(d.getMonth() + 1).padStart(2, "0");
+  const dia = String(d.getDate()).padStart(2, "0");
+  return `${ano}-${mes}-${dia}`; // YYYY-MM-DD
+})();
+
 
 useEffect(() => {
   supabase.auth.getSession().then(({ data }) => {
@@ -320,12 +330,12 @@ useEffect(() => {
     setSessionLoading(false);
   });
 
+
+
   return () => {
     data.subscription.unsubscribe();
   };
 }, []);
-
-     
 
 
   const getHojeLocal = () => {
@@ -337,6 +347,7 @@ useEffect(() => {
 
     return `${ano}-${mes}-${dia}`;
   };
+
 
   const [profiles] = useState<Profile[]>([
     { id: 'default', name: 'Perfil Principal' },
@@ -390,8 +401,13 @@ useEffect(() => {
   const [formParcelas, setFormParcelas] = useState(2);
   const [formPago, setFormPago] = useState(true);
   
-  const [isFixaSemTermino, setIsFixaSemTermino] = useState(true);
-  const [formDataTerminoFixa, setFormDataTerminoFixa] = useState(getHojeLocal());
+  const SEM_PRAZO_MESES = 60;
+
+type PrazoMode = "com_prazo" | "sem_prazo" | null;
+const [prazoMode, setPrazoMode] = useState<PrazoMode>(null);
+
+const [formDataTerminoFixa, setFormDataTerminoFixa] = useState(getHojeLocal());
+
 
   useEffect(() => {
   setFiltroCategoria('');
@@ -465,7 +481,7 @@ useEffect(() => {
   useEffect(() => {
     setFormCat(''); 
     setFormPago(formTipo === 'receita' ? false : true);
-    setIsFixaSemTermino(true);
+    setPrazoMode(null);
     setFormTipoGasto('');
     setIsParceladoMode(null);
   }, [formTipo]);
@@ -518,8 +534,10 @@ useEffect(() => {
     setUserName(nameInput.trim());
     setIsEditingName(false);
   };
+  
+  const anoRef = filtroMes.slice(0, 4);
+  const getFilteredTransactions = useMemo<Transaction[]>(() => {
 
-  const getFilteredTransactions = useMemo(() => {
     let list = [...transacoes];
     if (filtroMes) list = list.filter(t => t.data.startsWith(filtroMes));
     if (filtroLancamento !== "todos") list = list.filter(t => t.tipo === filtroLancamento);
@@ -531,7 +549,68 @@ useEffect(() => {
       if (a.tipo === 'despesa' && b.tipo === 'receita') return 1;
       return new Date(b.data).getTime() - new Date(a.data).getTime();
     });
+    const getFilteredTransactionsAno = useMemo<Transaction[]>(() => {
+  let list = [...transacoes];
+
+  // pega o ANO do filtroMes (ex: "2026-01" -> "2026")
+  const anoRef = (filtroMes || getHojeLocal().substring(0, 7)).slice(0, 4);
+
+  // aplica os mesmos filtros do mês, só que trocando "mês" por "ano"
+  if (filtroLancamento !== "todos") list = list.filter((t) => t.tipo === filtroLancamento);
+  if (filtroCategoria) list = list.filter((t) => t.categoria === filtroCategoria);
+  if (filtroMetodo) list = list.filter((t) => t.qualCartao === filtroMetodo);
+  if (filtroTipoGasto) list = list.filter((t) => t.tipoGasto === filtroTipoGasto);
+
+  // filtra pelo ano (YYYY)
+  list = list.filter((t) => t.data?.startsWith(anoRef));
+
+  // ordena por data desc
+  return list.sort((a, b) => new Date(b.data).getTime() - new Date(a.data).getTime());
+}, [transacoes, filtroMes, filtroLancamento, filtroCategoria, filtroMetodo, filtroTipoGasto]);
+
+const mostrarReceitasResumo = filtroLancamento !== "despesa";
+const mostrarDespesasResumo = filtroLancamento !== "receita";
+
+
+const totalAnualDespesas = useMemo(() => {
+  return getFilteredTransactionsAno
+    .filter((t) => t.tipo === "despesa")
+    .reduce((s, t) => s + Math.abs(Number(t.valor) || 0), 0);
+}, [getFilteredTransactionsAno]);
+
+    return list.sort((a, b) => {
+      if (a.tipo === 'receita' && b.tipo === 'despesa') return -1;
+      if (a.tipo === 'despesa' && b.tipo === 'receita') return 1;
+      return new Date(b.data).getTime() - new Date(a.data).getTime();
+    });
   }, [transacoes, filtroMes, filtroLancamento, filtroCategoria, filtroMetodo, filtroTipoGasto]);
+  const getFilteredTransactionsAno = useMemo<Transaction[]>(() => {
+  let list = [...transacoes];
+
+  const anoRef = (filtroMes || getHojeLocal().substring(0, 7)).slice(0, 4);
+
+  if (filtroLancamento !== "todos") list = list.filter((t) => t.tipo === filtroLancamento);
+  if (filtroCategoria) list = list.filter((t) => t.categoria === filtroCategoria);
+  if (filtroMetodo) list = list.filter((t) => t.qualCartao === filtroMetodo);
+  if (filtroTipoGasto) list = list.filter((t) => t.tipoGasto === filtroTipoGasto);
+
+  list = list.filter((t) => t.data?.startsWith(anoRef));
+
+  return list.sort((a, b) => new Date(b.data).getTime() - new Date(a.data).getTime());
+}, [transacoes, filtroMes, filtroLancamento, filtroCategoria, filtroMetodo, filtroTipoGasto]);
+
+const totalAnualReceitas = useMemo(() => {
+  return getFilteredTransactionsAno
+    .filter((t) => t.tipo === "receita")
+    .reduce((s, t) => s + (Number(t.valor) || 0), 0);
+}, [getFilteredTransactionsAno]);
+
+const totalAnualDespesas = useMemo(() => {
+  return getFilteredTransactionsAno
+    .filter((t) => t.tipo === "despesa")
+    .reduce((s, t) => s + Math.abs(Number(t.valor) || 0), 0);
+}, [getFilteredTransactionsAno]);
+
   const totalFiltradoReceitas = useMemo(() => {
   return getFilteredTransactions
     .filter(t => t.tipo === 'receita')
@@ -548,6 +627,8 @@ const totalFiltradoSaldo = useMemo(() => {
   return totalFiltradoReceitas - totalFiltradoDespesas;
 }, [totalFiltradoReceitas, totalFiltradoDespesas]);
 
+const mostrarReceitasResumo = filtroLancamento !== "despesa";
+const mostrarDespesasResumo = filtroLancamento !== "receita";
 
   const stats = useMemo(() => {
     const saldoAnterior = transacoes
@@ -611,6 +692,16 @@ const totalFiltradoSaldo = useMemo(() => {
     }
   }
 
+  const precisaEscolherPrazo =
+  (formTipo === "despesa" && isParceladoMode === false && formTipoGasto === "Fixo") ||
+  (formTipo === "receita" && formTipoGasto === "Fixo");
+
+if (precisaEscolherPrazo && prazoMode === null) {
+  toast("Selecione 'Com prazo' ou 'Sem prazo' para continuar.", "error");
+  return;
+}
+
+  
   const newTrans: Transaction[] = [];
   const recorrenciaId = `rec_${Date.now()}`;
   const descFinal = formTipo === "receita" ? (formDesc || formCat) : (formDesc || "Despesa");
@@ -641,7 +732,7 @@ const totalFiltradoSaldo = useMemo(() => {
     const dataInicio = new Date(formData + "T12:00:00");
     let mesesParaGerar = 12;
 
-    if (isFixaSemTermino) {
+    if (prazoMode === "sem_prazo") {
       mesesParaGerar = 60;
     } else {
       const dataFim = new Date(formDataTerminoFixa + "T12:00:00");
@@ -1056,7 +1147,7 @@ dark:border-slate-600 dark:bg-slate-700/70 dark:text-slate-100 dark:hover:bg-sla
                     />
                   ) : (
                     <CustomDropdown
-                      label="C/c & Cartões"
+                      label="Banco / Cartão"
                       value={formQualCartao}
                       options={metodosPagamento.credito}
                       onSelect={(val) => setFormQualCartao(val)}
@@ -1102,7 +1193,7 @@ dark:border-slate-600 dark:bg-slate-700/70 dark:text-slate-100 dark:hover:bg-sla
                   )}
                   <div>
                     <CustomDropdown
-                      label="C/c & Cartões"
+                      label="Banco / Cartão"
                       value={formQualCartao}
                       options={metodosPagamento.credito}
                       onSelect={(val) => setFormQualCartao(val)}
@@ -1119,33 +1210,46 @@ dark:border-slate-600 dark:bg-slate-700/70 dark:text-slate-100 dark:hover:bg-sla
                     <div className="grid grid-cols-2 gap-2">
   <button
     type="button"
-    onClick={() => setIsFixaSemTermino(false)}
+    onClick={() => setPrazoMode("com_prazo")}
     className={`py-2.5 rounded-xl text-xs font-bold border transition-all
-      ${!isFixaSemTermino
-        ? "bg-slate-200/90 border-slate-300 text-slate-900 shadow-sm dark:bg-slate-700/70 dark:border-slate-600 dark:text-slate-100"
-        : "bg-white border-slate-200 text-slate-500 hover:bg-slate-50 dark:bg-slate-900/70 dark:border-slate-800/60 dark:text-slate-300 dark:hover:bg-slate-900/80"
-      }`}
+  ${prazoMode === "com_prazo"
+    ? "bg-slate-200/90 border-slate-300 text-slate-900 shadow-sm dark:bg-slate-700/70 dark:border-slate-600 dark:text-slate-100"
+    : "bg-white border-slate-200 text-slate-500 hover:bg-slate-50 dark:bg-slate-900/70 dark:border-slate-800/60 dark:text-slate-300 hover:dark:bg-slate-800/60"
+  }`}
+
   >
     Com prazo
   </button>
 
   <button
     type="button"
-    onClick={() => setIsFixaSemTermino(true)}
+    onClick={() => setPrazoMode("sem_prazo")}
     className={`py-2.5 rounded-xl text-xs font-bold border transition-all
-      ${isFixaSemTermino
-        ? "bg-slate-200/90 border-slate-300 text-slate-900 shadow-sm dark:bg-slate-700/70 dark:border-slate-600 dark:text-slate-100"
-        : "bg-white border-slate-200 text-slate-500 hover:bg-slate-50 dark:bg-slate-900/70 dark:border-slate-800/60 dark:text-slate-300 dark:hover:bg-slate-900/80"
-      }`}
+  ${prazoMode === "sem_prazo"
+    ? "bg-slate-200/90 border-slate-300 text-slate-900 shadow-sm dark:bg-slate-700/70 dark:border-slate-600 dark:text-slate-100"
+    : "bg-white border-slate-200 text-slate-500 hover:bg-slate-50 dark:bg-slate-900/70 dark:border-slate-800/60 dark:text-slate-300 hover:dark:bg-slate-800/60"
+  }`}
+
   >
     Sem prazo
   </button>
 </div>
 
                   </div>
-                  {!isFixaSemTermino && (
-                    <CustomDateInput label="Último lançamento em:" value={formDataTerminoFixa} onChange={setFormDataTerminoFixa} />
-                  )}
+                  {prazoMode === "com_prazo" && (
+  <CustomDateInput
+    label="Último lançamento em:"
+    value={formDataTerminoFixa}
+    onChange={setFormDataTerminoFixa}
+  />
+)}
+{prazoMode === "sem_prazo" && (
+  <div className="mt-2 text-xs text-slate-500 dark:text-slate-400">
+    Sem prazo: vamos considerar 60 meses (5 anos) ou até você excluir este lançamento.
+  </div>
+)}
+
+
                 </div>
               )}
               <button type="button" onClick={handleAddTransaction} className="w-full py-4 rounded-2xl text-white font-semibold tracking-wide
@@ -1296,7 +1400,7 @@ shadow-[0_18px_50px_-35px_rgba(70,0,172,0.9)]">
 {filtroLancamento !== "todos" && (
   <div className="w-full lg:col-span-3">
     <CustomDropdown
-      placeholder="C/C & Cartões"
+      placeholder="Banco / Cartão"
       value={filtroMetodo}
       options={["Todos", ...metodosPagamento.credito]}
       onSelect={(val) => setFiltroMetodo(val === "Todos" ? "" : val)}
@@ -1338,73 +1442,163 @@ shadow-[0_18px_50px_-35px_rgba(70,0,172,0.9)]">
   </div>
 </div>
 
-<div className="flex flex-wrap items-center gap-3 text-[11px] text-slate-500 dark:text-slate-400">
-  {filtroLancamento === "receita" ? (
-    <div className="flex items-center gap-2">
-      <span className="uppercase tracking-wider font-bold">Total (Entradas):</span>
-      <span className="font-black text-emerald-600 dark:text-emerald-400">
-        {formatarMoeda(totalFiltradoReceitas)}
-      </span>
-    </div>
-  ) : filtroLancamento === "despesa" ? (
-    <div className="flex items-center gap-2">
-      <span className="uppercase tracking-wider font-bold">Total (Saídas):</span>
-      <span className="font-black text-rose-600 dark:text-rose-400">
-        {formatarMoeda(totalFiltradoDespesas)}
-      </span>
-    </div>
-  ) : (
-    <>
-      <div className="flex items-center gap-2">
-        <span className="uppercase tracking-wider font-bold">Entradas:</span>
-        <span className="font-black text-emerald-600 dark:text-emerald-400">
-          {formatarMoeda(totalFiltradoReceitas)}
-        </span>
-      </div>
-      <div className="flex items-center gap-2">
-        <span className="uppercase tracking-wider font-bold">Saídas:</span>
-        <span className="font-black text-rose-600 dark:text-rose-400">
-          {formatarMoeda(totalFiltradoDespesas)}
-        </span>
-      </div>
-      <div className="flex items-center gap-2">
-        <span className="uppercase tracking-wider font-bold">Saldo:</span>
-        <span className={`font-black ${totalFiltradoSaldo >= 0 ? "text-emerald-600 dark:text-emerald-400" : "text-rose-600 dark:text-rose-400"}`}>
-          {formatarMoeda(totalFiltradoSaldo)}
-        </span>
-      </div>
-    </>
+<div className="flex flex-col gap-2">
+ 
+ <div className="flex flex-wrap items-center gap-3 text-[10px] uppercase tracking-wider">
+  {/* MENSAL */}
+  <span className="text-slate-400/80 dark:text-slate-500/80">Mensal</span>
+
+  {mostrarReceitasResumo && (
+    <span className="font-semibold text-emerald-600 dark:text-emerald-400">
+      +{formatarMoeda(totalFiltradoReceitas)}
+    </span>
   )}
 
-  <span className="text-slate-300 dark:text-slate-700">•</span>
-  <span className="font-bold">{getFilteredTransactions.length} lançamentos</span>
-</div>
+  {mostrarDespesasResumo && (
+    <span className="font-semibold text-rose-600 dark:text-rose-400">
+      -{formatarMoeda(totalFiltradoDespesas)}
+    </span>
+  )}
+
+  <span className="mx-1 text-slate-400/50 dark:text-slate-600/50">•</span>
+
+  {/* ANUAL */}
+  <span className="text-slate-400/80 dark:text-slate-500/80">
+    Anual ({(filtroMes || getHojeLocal().substring(0, 7)).slice(0, 4)})
+  </span>
+
+  {mostrarReceitasResumo && (
+    <span className="font-semibold text-emerald-600 dark:text-emerald-400">
+      +{formatarMoeda(totalAnualReceitas)}
+    </span>
+  )}
+
+  {mostrarDespesasResumo && (
+    <span className="font-semibold text-rose-600 dark:text-rose-400">
+      -{formatarMoeda(totalAnualDespesas)}
+    </span>
+  )}
+</div>   
+
+ </div>
+
 
 
                   <div className="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider">{getFilteredTransactions.length} Lançamentos Encontrados</div>
                 </div>
-                <div className="space-y-3">
-                  {getFilteredTransactions.length > 0 ? getFilteredTransactions.map(t => (
-                    <div key={t.id} className={`group flex items-center justify-between p-4 rounded-2xl border transition-all ${t.pago ? 'opacity-80' : ''} ${t.tipo === 'receita' ? 'bg-emerald-50/20 dark:bg-emerald-900/10 border-emerald-100 dark:border-emerald-900/30' : 'bg-slate-50/50 dark:bg-slate-800/50 border-slate-100 dark:border-slate-700/50'}`}>
-                      <div className="flex items-center gap-4">
-                         <button type="button" onClick={() => togglePago(t.id)} className={`w-8 h-8 rounded-full border-2 flex items-center justify-center font-bold transition-all ${t.pago ? 'bg-indigo-500 border-indigo-500 text-white shadow-sm' : 'border-slate-300 dark:border-slate-600 text-transparent hover:border-indigo-300'}`}>✓</button>
-                         <div>
-                           <p className="font-bold text-slate-800 dark:text-slate-100 leading-none mb-1.5">{t.descricao}</p>
-                           <div className="flex flex-wrap items-center gap-2">
-                             <span className={`text-[10px] font-black uppercase px-2 py-0.5 rounded-full ${t.pago ? 'bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-400' : 'bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-400'}`}>{t.pago ? 'Pago' : 'Pendente'}</span>
-                             <p className="text-[10px] text-slate-500 dark:text-slate-400 uppercase font-bold">{formatarData(t.data)} <span className="mx-1">•</span> {t.categoria} {t.qualCartao && <><span className="mx-1">•</span> <span className="text-indigo-500 dark:text-indigo-400">{t.qualCartao}</span></>} {t.tipoGasto && <><span className="mx-1">•</span> <span className="text-slate-400 dark:text-slate-500">{t.tipoGasto}</span></>}</p>
-                           </div>
-                         </div>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <p className={`font-black text-lg ${t.tipo === 'receita' ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400'}`}>{formatarMoeda(Math.abs(t.valor))}</p>
-                        <button type="button" onClick={() => handleEditClick(t)} className="p-2 text-indigo-300 dark:text-slate-600 hover:text-indigo-600 dark:hover:text-indigo-400 opacity-0 group-hover:opacity-100 transition-opacity"><EditIcon /></button>
-                        <button type="button" onClick={() => setDeletingTransaction(t)} className="p-2 text-rose-300 dark:text-slate-600 hover:text-rose-600 dark:hover:text-rose-400 opacity-0 group-hover:opacity-100 transition-opacity"><TrashIcon /></button>
-                      </div>
-                    </div>
-                  )) : (
-                    <div className="py-20 text-center space-y-2"><p className="text-xs leading-relaxed text-slate-500 dark:text-slate-400">Nenhum registro encontrado para estes filtros.</p></div>
-                  )}
+                <div className="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider">
+  {getFilteredTransactions.length} Lançamentos Encontrados
+</div>
+
+<div className="space-y-3">
+  {getFilteredTransactions.length > 0 ? (
+  <div className="space-y-3">
+    {getFilteredTransactions.map((t) => {
+      const atrasada = !t.pago && t.data < hoje;
+
+      const baseBg =
+        t.tipo === "receita"
+          ? "bg-emerald-50/20 dark:bg-emerald-900/10 border-emerald-100 dark:border-emerald-700/20"
+          : "bg-rose-50/20 dark:bg-rose-900/10 border-rose-100 dark:border-rose-700/20";
+
+      const glowAtraso = atrasada
+  ? "ring-2 ring-rose-400/60 dark:ring-rose-500/30 bg-rose-50/25 dark:bg-rose-500/10 shadow-[0_0_26px_rgba(244,63,94,0.28)]"
+  : "";
+
+      return (
+        <div
+          key={t.id}
+          className={`group flex items-center justify-between p-4 rounded-2xl border transition-all ${baseBg} ${
+            t.pago ? "opacity-80" : ""
+          } ${glowAtraso}`}
+        >
+          {/* ESQUERDA */}
+          <div className="flex items-center gap-4">
+            <button
+              type="button"
+              onClick={() => togglePago(t.id)}
+              className={`w-8 h-8 rounded-full border-2 flex items-center justify-center font-bold transition-all ${
+                t.pago
+                  ? "bg-indigo-600 border-indigo-600 text-white"
+                  : "border-slate-300 dark:border-slate-700 text-slate-400"
+              }`}
+              title={t.pago ? "Marcar como não pago" : "Marcar como pago"}
+            >
+              {t.pago ? "✓" : ""}
+            </button>
+
+            <div>
+              <p className="font-bold text-slate-800 dark:text-slate-100 leading-none mb-1.5">
+                {t.descricao}
+              </p>
+
+              <div className="flex flex-wrap items-center gap-2 text-[10px] uppercase tracking-wide">
+<span
+  className={`px-2 py-0.5 rounded-full font-black ${
+    t.pago
+      ? "bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300"
+      : atrasada
+        ? "bg-rose-100/80 dark:bg-rose-900/30 text-rose-700 dark:text-rose-300"
+        : "bg-amber-100/70 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300"
+  }`}
+>
+  {t.pago ? "Pago" : atrasada ? "Atrasada" : "Pendente"}
+</span>
+
+                <span className="text-slate-500 dark:text-slate-400 uppercase font-bold">
+                  {formatarData(t.data)} <span className="mx-1">•</span> {t.categoria}
+                  {t.qualCartao ? (
+                    <>
+                      <span className="mx-1">•</span> {t.qualCartao}
+                    </>
+                  ) : null}
+                </span>
+              </div>
+            </div>
+          </div>
+
+          {/* DIREITA */}
+          <div className="flex items-center gap-2">
+            <p
+              className={`font-black text-lg ${
+                t.tipo === "receita"
+                  ? "text-emerald-600 dark:text-emerald-400"
+                  : "text-rose-600 dark:text-rose-400"
+              }`}
+            >
+              {formatarMoeda(Math.abs(t.valor))}
+            </p>
+
+            <button
+              type="button"
+              onClick={() => handleEditClick(t)}
+              className="p-2 text-indigo-300 dark:text-slate-600 hover:text-indigo-600 dark:hover:text-indigo-400 opacity-0 group-hover:opacity-100 transition-opacity"
+              title="Editar"
+            >
+              <EditIcon />
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setDeletingTransaction(t)}
+              className="p-2 text-rose-300 dark:text-slate-600 hover:text-rose-600 dark:hover:text-rose-400 opacity-0 group-hover:opacity-100 transition-opacity"
+              title="Excluir"
+            >
+              <TrashIcon />
+            </button>
+          </div>
+        </div>
+      );
+    })}
+  </div>
+) : (
+  <div className="py-20 text-center space-y-2">
+    <p className="text-xs leading-relaxed text-slate-500 dark:text-slate-400">
+      Nenhum registro encontrado para estes filtros.
+    </p>
+  </div>
+)}
+
                 </div>
               </div>
             )}
@@ -1440,6 +1634,7 @@ shadow-[0_18px_50px_-35px_rgba(70,0,172,0.9)]">
                 ) : (
                   <div className="py-20 text-center space-y-4"><p className="text-slate-400 dark:text-slate-500 font-medium">Sem despesas registradas em {getMesAnoExtenso(filtroMes)}.</p><button onClick={() => setFiltroMes(getHojeLocal().substring(0, 7))} className="text-indigo-600 dark:text-indigo-400 font-bold text-sm transition-colors">Voltar para o mês atual</button></div>
                 )}
+             
               </div>
             )}
             {activeTab === 'projecao' && (
@@ -1611,7 +1806,7 @@ shadow-[0_18px_50px_-35px_rgba(70,0,172,0.9)]">
           <div className="bg-white dark:bg-slate-900 rounded-[2.5rem] p-8 max-w-md w-full shadow-2xl animate-in zoom-in-95">
             <h3 className="text-2xl font-black mb-4 text-slate-800 dark:text-white">Confirmar Exclusão</h3>
             <p className="text-slate-500 dark:text-slate-400 mb-8 font-medium leading-relaxed">{deletingTransaction.recorrenciaId ? <>Você está apagando "<span className="font-black text-slate-800 dark:text-slate-100">{deletingTransaction.descricao}</span>". Como deseja prosseguir?</> : <>Tem certeza que quer excluir este lançamento? Você está apagando "<span className="font-black text-slate-800 dark:text-slate-100">{deletingTransaction.descricao}</span>".</>}</p>
-            <div className="space-y-3"><button onClick={() => confirmarExclusao(false)} className={`w-full py-4 rounded-2xl font-black transition-colors ${deletingTransaction.recorrenciaId ? 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700' : 'bg-rose-600 text-white shadow-lg shadow-rose-200 dark:shadow-none hover:bg-rose-700'}`}>{deletingTransaction.recorrenciaId ? 'Excluir apenas este lançamento' : 'Sim, excluir lançamento'}</button>{deletingTransaction.recorrenciaId && (<button onClick={() => confirmarExclusao(true)} className="w-full py-4 bg-rose-600 text-white rounded-2xl font-black shadow-lg shadow-rose-200 dark:shadow-none hover:bg-rose-700 transition-colors">Excluir toda a recorrência/parcelas</button>)}<button onClick={() => setDeletingTransaction(null)} className="w-full py-4 text-slate-400 dark:text-slate-500 font-bold text-sm uppercase transition-colors">Voltar</button></div>
+            <div className="space-y-3"><button onClick={() => confirmarExclusao(false)} className={`w-full py-4 rounded-2xl font-black transition-colors ${deletingTransaction.recorrenciaId ? 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700' : 'bg-rose-600 text-white shadow-lg shadow-rose-200 dark:shadow-none hover:bg-rose-700'}`}>{deletingTransaction.recorrenciaId ? 'Excluir apenas este lançamento' : 'Sim, excluir lançamento'}</button>{deletingTransaction.recorrenciaId && (<button onClick={() => confirmarExclusao(true)} className="w-full py-4 bg-rose-600 text-white rounded-2xl font-black shadow-lg shadow-rose-200 dark:shadow-none hover:bg-rose-700 transition-colors">Excluir deste mês em diante</button>)}<button onClick={() => setDeletingTransaction(null)} className="w-full py-4 text-slate-400 dark:text-slate-500 font-bold text-sm uppercase transition-colors">Voltar</button></div>
           </div>
         </div>
       )}
